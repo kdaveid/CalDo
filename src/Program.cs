@@ -8,7 +8,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<PersistenceService>();
+builder.Services.AddScoped<CalendarEventService>();
+builder.Services.AddScoped<ToDoEventService>();
 
 var app = builder.Build();
 

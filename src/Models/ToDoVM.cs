@@ -57,7 +57,7 @@ namespace CalDo.Models
                 Description = item.Description,
                 DtStart = item.StartDT.HasValue ? new CalDateTime(item.StartDT.Value) : null,
                 DtEnd = item.EndDT.HasValue ? new CalDateTime(item.EndDT.Value) : null,
-                Url = new Uri($"http://homecal.dkbe.ch/{item.Uid}"),
+                Url = new Uri($"http://homecal.schatzinos.net/{item.Uid}"),
                 RecurrenceRules = new List<RecurrencePattern> { new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval) }
             };
         }

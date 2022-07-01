@@ -9,10 +9,10 @@ namespace CalDo.Controllers
     [ApiController]
     public class CalendarController : ControllerBase
     {
-        private readonly PersistenceService _service;
+        private readonly CalendarEventService _service;
         private readonly ILogger<CalendarController> _logger;
 
-        public CalendarController(PersistenceService service, ILogger<CalendarController> logger)
+        public CalendarController(CalendarEventService service, ILogger<CalendarController> logger)
         {
             _service = service;
             _logger = logger;

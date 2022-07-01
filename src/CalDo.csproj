@@ -15,6 +15,9 @@
     <None Update="Data\.git">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Data\Events\.git">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Data\ToDoItems\.git">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

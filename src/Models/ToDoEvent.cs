@@ -2,13 +2,13 @@
 
 public class ToDoEvent
 {
-    public long EventId { get; set; }
-
-    public DateTimeOffset OccurredAt { get; set; }
+    public int EventId { get; set; }
 
     public DateTime Date { get; set; }
 
-    public int ToDoId;
+    public string CalendarEventId {get;set; } = string.Empty;
 
     public string? Remarks { get; set; }
+
+    public bool? AdjustCalendar { get; set; }
 }

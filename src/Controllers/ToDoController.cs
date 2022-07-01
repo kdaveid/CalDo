@@ -8,9 +8,9 @@ namespace CalDo.Controllers;
 [Route("api/todo")]
 public class ToDoController : ControllerBase
 {
-    private readonly PersistenceService _service;
+    private readonly CalendarEventService _service;
 
-    public ToDoController(PersistenceService service)
+    public ToDoController(CalendarEventService service)
     {
         _service = service;
     }
@@ -28,9 +28,23 @@ public class ToDoController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public ToDoVM Get([FromRoute] int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ToDoVM))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Get([FromRoute] string id)
     {
-        return ToDoVM.From(_service.Get(id));
+        var item = _service.GetEnabled(id);
+        if (item != null)
+        {
+            return Ok(ToDoVM.From(item));
+        }
+
+        item = _service.GetDisabled(id);
+        if (item != null)
+        {
+            return Ok(ToDoVM.From(item));
+        }
+
+        return NotFound();
     }
 
     [HttpPost()]

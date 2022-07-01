@@ -4,7 +4,7 @@ using Ical.Net.Serialization;
 
 namespace CalDo.Functions
 {
-    public class PersistenceService
+    public class CalendarEventService
     {
         private static readonly string RootPath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
         private static readonly string ToDoPath = Path.Combine(RootPath, "ToDoItems");
@@ -17,6 +17,8 @@ namespace CalDo.Functions
 
             return files
                 .Select(s => ReadFile(s))
+                .Where(s => s != null)
+                .Cast<CalendarEvent>()
                 .ToList();
         }
 
@@ -26,14 +28,24 @@ namespace CalDo.Functions
 
             return files
                 .Select(s => ReadFile(s))
+                .Where(s => s != null)
+                .Cast<CalendarEvent>()
                 .ToList();
         }
 
-        public CalendarEvent Get(int id)
+        public CalendarEvent? GetEnabled(string id)
             => ReadFile(Path.Combine(ToDoPath, $"{id}.ics"));
 
-        private static CalendarEvent ReadFile(string filePath)
+        public CalendarEvent? GetDisabled(string id)
+            => ReadFile(Path.Combine(ToDoDisabledPath, $"{id}.ics"));
+
+        private static CalendarEvent? ReadFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
             using var fs = new FileStream(filePath, FileMode.Open);
             var cal = Calendar.Load(fs);
 
