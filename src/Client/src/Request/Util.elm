@@ -20,7 +20,7 @@ apiUrl origin str =
 
 apiUrlArr : String -> List String -> String
 apiUrlArr origin strs =
-    origin ++ "/sensor-supervision/api/" ++ String.join "/" strs
+    origin ++ "/api/" ++ String.join "/" strs
 
 
 getJson : String -> (Result Http.Error a -> msg) -> JD.Decoder a -> Cmd msg

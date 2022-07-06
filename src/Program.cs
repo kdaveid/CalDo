@@ -10,6 +10,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<CalendarEventService>();
 builder.Services.AddScoped<ToDoEventService>();
+builder.Services.AddCors(o => o.AddDefaultPolicy(builder =>
+{
+    builder
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithOrigins("http://localhost:1234");
+}));
 
 var app = builder.Build();
 
@@ -21,6 +29,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+app.UseCors();
 
 app.UseAuthorization();
 

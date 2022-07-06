@@ -14,7 +14,8 @@
   <script>
     var origin = location.protocol.concat("//").concat(window.location.host);
     if (origin == "http://localhost:1234") {
-      origin = "https://caldo.schatzinos.net:5016"
+      origin = "http://localhost:5016"
+      // caldo.schatzinos.net
     }
     Elm.Main.init({
       flags: {
