@@ -168,7 +168,7 @@ radioFormCheck radioAttrs =
     let
         radioButtonAttributes : List (Html.Attribute msg)
         radioButtonAttributes =
-            [ class "form-check-input position-static"
+            [ class "form-check-input" --position-static
             , type_ "radio"
             ]
     in
@@ -176,6 +176,13 @@ radioFormCheck radioAttrs =
         [ input
             (radioButtonAttributes ++ radioAttrs)
             []
+        ]
+
+
+viewFreqRadio name val lbl =
+    div [ class "form-check form-check-inline" ]
+        [ input [ type_ "radio", class "form-check-input", HA.name name, value val ] []
+        , label [ class "form-check-label", HA.for name ] [ text lbl ]
         ]
 
 
@@ -196,20 +203,26 @@ viewCreate =
                 , Html.textarea [ HA.name "description", class "form-control" ] []
                 ]
             , div [ class "mb-3" ]
-                [ div [ class "row g-3" ]
+                [ viewLabel [ text "Wiederholung" ]
+                , div [ class "row g-3" ]
                     [ div [ class "col-auto" ]
-                        [ viewLabel [ text "Wiederholung" ]
-                        , radioFormCheck
-                            [ HA.name "-frequency"
-                            , value "frequently"
-                            ]
-                        , div [ class "col-auto" ]
-                            [ viewLabel [ text "Intervall" ]
-                            , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value "1" ] []
-                            ]
+                        [ viewFreqRadio "no-frequency" "none" "Nie"
+                        , viewFreqRadio "second-frequency" "secondly" "Sekündlich"
+                        , viewFreqRadio "minute-frequency" "minutly" "Minütlich"
+                        , viewFreqRadio "hourly-frequency" "hourly" "Stündlich"
+                        , viewFreqRadio "daily-frequency" "daily" "Täglich"
+                        , viewFreqRadio "weekly-frequency" "weekly" "Wöchentlich"
+                        , viewFreqRadio "monthly-frequency" "monthly" "Monatlich"
+                        , viewFreqRadio "yearly-frequency" "yearly" "Jährlich"
                         ]
                     ]
-                , button [ type_ "submit", class "btn btn-primary" ] [ text "Absenden" ]
+                ]
+            , div [ class "mb-3" ]
+                [ viewLabel [ text "Intervall" ]
+                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value "1" ] []
+                ]
+            , div [ class "mb-3" ]
+                [ button [ type_ "submit", class "btn btn-primary" ] [ text "Absenden" ]
                 ]
             ]
         ]
