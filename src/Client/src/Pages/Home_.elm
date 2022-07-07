@@ -1,6 +1,8 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr, freqToStr)
+import Element exposing (html)
+import Element.Font exposing (hairline)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route exposing (Route)
 import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, i, input, label, small, table, tbody, td, text, th, thead, tr)
@@ -217,7 +219,7 @@ viewFreqRadio name val lbl checked =
 
 viewEdit : ToDo -> Html Msg
 viewEdit todo =
-    card
+    div [ class "card" ]
         [ div [ class "card-header" ]
             [ if todo.uid == "" then
                 text "Add new"
@@ -237,18 +239,46 @@ viewEdit todo =
                 , Html.textarea [ HA.name "description", HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry", class "form-control", HA.attribute "rows" "4", HA.attribute "aria-describedby" "descriptionHelp", onInput OnDescriptionChange ] []
                 , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
                 ]
+            , div [ class "row" ]
+                [ div [ class "col-md-12 mb-3" ]
+                    [ viewLabel [ text "Start" ]
+                    , Html.input [ HA.name "start", class "form-control" ] []
+                    ]
+                , div [ class "col-md-6 mb-3" ]
+                    [ viewLabel [ text "End" ]
+                    , Html.input [ HA.name "end", class "form-control" ] []
+                    ]
+                , div [ class "col-md-6 mb-3" ]
+                    [ Html.label [ class "form-label" ] [ text "" ]
+                    , div [ class "form-check mt-3" ]
+                        [ Html.input [ HA.id "noEnd", type_ "checkbox", class "form-check-input" ] []
+                        , Html.label [ class "form-check-label", HA.attribute "for" "noEnd" ] [ text "Open End" ]
+                        ]
+                    ]
+                ]
+            , div [ class "mb-3" ]
+                [ viewLabel [ text "Alert" ]
+                , Html.select [ HA.name "alert", class "form-select" ]
+                    [ Html.option [ value "none" ] [ text "None" ]
+                    , Html.option [ value "30minutes" ] [ text "30 mintutes" ]
+                    , Html.option [ value "1hour" ] [ text "1 hour" ]
+                    , Html.option [ value "4hours" ] [ text "4 hours" ]
+                    , Html.option [ value "12hours" ] [ text "12 hours" ]
+                    , Html.option [ value "1day" ] [ text "1 day" ]
+                    ]
+                ]
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Repetition" ]
                 , div [ class "row g-3" ]
                     [ div [ class "col-auto" ]
-                        [ viewFreqRadio "none-frequency" "none" "Never"
-                        , viewFreqRadio "second-frequency" "secondly" "Secondly"
-                        , viewFreqRadio "minute-frequency" "minutely" "Minutley"
-                        , viewFreqRadio "hourly-frequency" "hourly" "Hourly"
-                        , viewFreqRadio "daily-frequency" "daily" "Daily"
-                        , viewFreqRadio "weekly-frequency" "weekly" "Weekly"
-                        , viewFreqRadio "monthly-frequency" "monthly" "Monthly"
-                        , viewFreqRadio "yearly-frequency" "yearly" "Yearly"
+                        [ viewFreqRadio "none-frequency" "none" "Never" (todo.frequency == Data.ToDo.None)
+                        , viewFreqRadio "second-frequency" "secondly" "Secondly" (todo.frequency == Data.ToDo.Secondly)
+                        , viewFreqRadio "minute-frequency" "minutely" "Minutely" (todo.frequency == Data.ToDo.Minutely)
+                        , viewFreqRadio "hourly-frequency" "hourly" "Hourly" (todo.frequency == Data.ToDo.Hourly)
+                        , viewFreqRadio "daily-frequency" "daily" "Daily" (todo.frequency == Data.ToDo.Daily)
+                        , viewFreqRadio "weekly-frequency" "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
+                        , viewFreqRadio "monthly-frequency" "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
+                        , viewFreqRadio "yearly-frequency" "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
                         ]
                     ]
                 ]
@@ -333,8 +363,3 @@ formGroup =
 row : List (Html msg) -> Html msg
 row =
     div [ class "row" ]
-
-
-card : List (Html msg) -> Html msg
-card =
-    div [ class "card" ]
