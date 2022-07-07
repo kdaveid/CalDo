@@ -30,7 +30,7 @@ type alias ToDo =
 
 emptyToDo : ToDo
 emptyToDo =
-    { uid = "", name = "", description = Nothing, startDT = "", endDT = "", frequency = Never, enabled = False, interval = 0 }
+    { uid = "", name = "", description = Nothing, startDT = "", endDT = "", frequency = Monthly, enabled = False, interval = 1 }
 
 
 toDoDecoder : JD.Decoder ToDo

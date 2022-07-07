@@ -187,7 +187,7 @@ viewFreqRadio : String -> String -> String -> Html msg
 viewFreqRadio name val lbl =
     let
         defaultAttrib =
-            [ type_ "radio", class "form-check-input", HA.name name, value val ]
+            [ type_ "radio", class "form-check-input", HA.id name, HA.name "frequency", value val ]
     in
     div [ class "form-check form-check-inline" ]
         [ input defaultAttrib []
@@ -205,10 +205,10 @@ viewCreate todo =
             [ div [ class "mb-3" ]
                 [ viewLabel [ text "Name" ]
                 , Html.input [ type_ "text", HA.name "name", class "form-control", HA.attribute "aria-describedby" "nameHelp" ] []
-                , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Name of the calendar entry" ]
+                , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Summary / Name of the calendar entry" ]
                 ]
             , div [ class "mb-3" ]
-                [ viewLabel [ text "Beschreibung" ]
+                [ viewLabel [ text "Description" ]
                 , Html.textarea [ HA.name "description", class "form-control", HA.attribute "aria-describedby" "descriptionHelp" ] []
                 , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
                 ]
@@ -221,7 +221,7 @@ viewCreate todo =
                         , viewFreqRadio "minute-frequency" "minutly" "Minutly"
                         , viewFreqRadio "hourly-frequency" "hourly" "Hourly"
                         , viewFreqRadio "daily-frequency" "daily" "Daily"
-                        , viewFreqRadio "weekly-frequency" "weekly" "weekly"
+                        , viewFreqRadio "weekly-frequency" "weekly" "Weekly"
                         , viewFreqRadio "monthly-frequency" "monthly" "Monthly"
                         , viewFreqRadio "yearly-frequency" "yearly" "Yearly"
                         ]
@@ -230,7 +230,9 @@ viewCreate todo =
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Interval" ]
                 , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value "1" ] []
-                , viewOrdinalFreqText todo
+                ]
+            , div [ class "mb-3" ]
+                [ viewOrdinalFreqText todo
                 ]
             , div [ class "mb-3" ]
                 [ button [ type_ "submit", class "btn btn-primary" ] [ text "Absenden" ]
@@ -241,12 +243,53 @@ viewCreate todo =
 
 viewOrdinalFreqText : ToDo -> Html msg
 viewOrdinalFreqText todo =
-    case todo.frequency of
-        Never ->
-            viewLabel [ text "Runs never" ]
+    if todo.interval <= 0 then
+        viewLabel [ text "Runs once" ]
 
-        Secondly ->
-            viewLabel [ text ("Runs every " ++ String.fromInt todo.interval ++ " second") ]
+    else
+        case todo.frequency of
+            Never ->
+                viewAlert "Runs once"
 
-        _ ->
-            viewLabel [ text "error" ]
+            Secondly ->
+                viewFreqLabel todo.interval "second"
+
+            Minutely ->
+                viewFreqLabel todo.interval "minute"
+
+            Hourly ->
+                viewFreqLabel todo.interval "hour"
+
+            Daily ->
+                viewFreqLabel todo.interval "day"
+
+            Weekly ->
+                viewFreqLabel todo.interval "week"
+
+            Monthly ->
+                viewFreqLabel todo.interval "month"
+
+            Yearly ->
+                viewFreqLabel todo.interval "year"
+
+            Unknown ->
+                viewAlert "Unknown - an error!"
+
+
+
+-- _ ->
+--     viewLabel [ text "error" ]
+
+
+viewAlert : String -> Html msg
+viewAlert str =
+    div [ class "alert alert-primary", HA.attribute "role" "alert" ] [ text str ]
+
+
+viewFreqLabel : Int -> String -> Html msg
+viewFreqLabel int freq =
+    if int == 1 then
+        viewAlert ("Runs every " ++ freq)
+
+    else
+        viewAlert ("Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s")
