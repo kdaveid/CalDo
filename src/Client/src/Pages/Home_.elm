@@ -196,14 +196,21 @@ viewEnabled value =
 --         ]
 
 
-viewFreqRadio : String -> String -> String -> Html Msg
-viewFreqRadio name val lbl =
+viewFreqRadio : String -> String -> String -> Bool -> Html Msg
+viewFreqRadio name val lbl checked =
     let
+        checkedAttrib =
+            if checked then
+                [ HA.attribute "checked" "checked" ]
+
+            else
+                []
+
         defaultAttrib =
             [ type_ "radio", class "form-check-input", HA.id name, HA.name "frequency", value val ]
     in
     div [ class "form-check form-check-inline" ]
-        [ input (defaultAttrib ++ [ onInput OnFrequencyChange ]) []
+        [ input (defaultAttrib ++ onInput OnFrequencyChange :: checkedAttrib) []
         , label [ class "form-check-label", HA.for name ] [ text lbl ]
         ]
 
