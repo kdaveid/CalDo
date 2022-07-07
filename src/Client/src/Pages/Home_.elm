@@ -1,11 +1,11 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
-import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
+import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr, freqToStr)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route exposing (Route)
 import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, i, input, label, small, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, style, type_, value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onCheck, onInput)
 import Http
 import Infra exposing (..)
 import Page
@@ -58,6 +58,7 @@ type Msg
     | OnNameChange String
     | OnDescriptionChange String
     | OnIntervalChange String
+    | OnFrequencyChange String
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Cmd Msg )
@@ -95,6 +96,13 @@ update shared msg model =
                     model.current
             in
             ( { model | current = { current | interval = val |> String.toInt |> Maybe.withDefault 0 } }, Cmd.none )
+
+        OnFrequencyChange val ->
+            let
+                current =
+                    model.current
+            in
+            ( { model | current = { current | frequency = val |> freqFromStr } }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -188,14 +196,14 @@ viewEnabled value =
 --         ]
 
 
-viewFreqRadio : String -> String -> String -> Html msg
+viewFreqRadio : String -> String -> String -> Html Msg
 viewFreqRadio name val lbl =
     let
         defaultAttrib =
             [ type_ "radio", class "form-check-input", HA.id name, HA.name "frequency", value val ]
     in
     div [ class "form-check form-check-inline" ]
-        [ input defaultAttrib []
+        [ input (defaultAttrib ++ [ onInput OnFrequencyChange ]) []
         , label [ class "form-check-label", HA.for name ] [ text lbl ]
         ]
 
@@ -214,21 +222,21 @@ viewEdit todo =
             [ class "card-body" ]
             [ div [ class "mb-3" ]
                 [ viewLabel [ text "Name" ]
-                , Html.input [ type_ "text", HA.name "name", class "form-control", HA.attribute "aria-describedby" "nameHelp", onInput OnNameChange ] []
+                , Html.input [ type_ "text", HA.name "name", HA.placeholder "Clean the washmaschine", class "form-control", HA.attribute "aria-describedby" "nameHelp", onInput OnNameChange ] []
                 , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Summary / Name of the calendar entry" ]
                 ]
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Description" ]
-                , Html.textarea [ HA.name "description", class "form-control", HA.attribute "aria-describedby" "descriptionHelp", onInput OnDescriptionChange ] []
+                , Html.textarea [ HA.name "description", HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry", class "form-control", HA.attribute "rows" "4", HA.attribute "aria-describedby" "descriptionHelp", onInput OnDescriptionChange ] []
                 , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
                 ]
             , div [ class "mb-3" ]
-                [ viewLabel [ text "Repeated" ]
+                [ viewLabel [ text "Repetition" ]
                 , div [ class "row g-3" ]
                     [ div [ class "col-auto" ]
-                        [ viewFreqRadio "never-frequency" "never" "Never"
+                        [ viewFreqRadio "none-frequency" "none" "Never"
                         , viewFreqRadio "second-frequency" "secondly" "Secondly"
-                        , viewFreqRadio "minute-frequency" "minutly" "Minutly"
+                        , viewFreqRadio "minute-frequency" "minutely" "Minutley"
                         , viewFreqRadio "hourly-frequency" "hourly" "Hourly"
                         , viewFreqRadio "daily-frequency" "daily" "Daily"
                         , viewFreqRadio "weekly-frequency" "weekly" "Weekly"
@@ -239,7 +247,7 @@ viewEdit todo =
                 ]
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Interval" ]
-                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value (String.fromInt todo.interval), onInput OnIntervalChange ] []
+                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value (todo.interval |> String.fromInt), onInput OnIntervalChange ] []
                 ]
             , div [ class "mb-3" ]
                 [ viewOrdinalFreqText todo
@@ -254,12 +262,12 @@ viewEdit todo =
 viewOrdinalFreqText : ToDo -> Html msg
 viewOrdinalFreqText todo =
     if todo.interval <= 0 then
-        viewLabel [ text "Runs once" ]
+        viewLabel [ text "Runs just once" ]
 
     else
         case todo.frequency of
             None ->
-                viewAlert "Runs once"
+                viewAlert "Runs just once"
 
             Secondly ->
                 viewFreqLabel todo.interval "second"

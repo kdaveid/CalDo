@@ -1,4 +1,4 @@
-module Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr, frequencyDecoder, toDoDecoder)
+module Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr, freqToStr, frequencyDecoder, toDoDecoder)
 
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
@@ -106,3 +106,34 @@ freqToStr freq =
 
         Unknown ->
             "Unknown"
+
+
+freqFromStr : String -> Frequency
+freqFromStr freq =
+    case freq |> String.toLower of
+        "none" ->
+            None
+
+        "secondly" ->
+            Secondly
+
+        "minutely" ->
+            Minutely
+
+        "hourly" ->
+            Hourly
+
+        "daily" ->
+            Daily
+
+        "weekly" ->
+            Weekly
+
+        "monthly" ->
+            Monthly
+
+        "yearly" ->
+            Yearly
+
+        _ ->
+            Unknown
