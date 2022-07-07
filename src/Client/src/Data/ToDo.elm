@@ -5,7 +5,7 @@ import Json.Decode.Pipeline as JD
 
 
 type Frequency
-    = Never
+    = None
     | Secondly
     | Minutely
     | Hourly
@@ -50,7 +50,7 @@ frequencyDecoder : String -> JD.Decoder Frequency
 frequencyDecoder str =
     case str |> String.toLower of
         "none" ->
-            JD.succeed Never
+            JD.succeed None
 
         "secondly" ->
             JD.succeed Secondly
@@ -80,7 +80,7 @@ frequencyDecoder str =
 freqToStr : Frequency -> String
 freqToStr freq =
     case freq of
-        Never ->
+        None ->
             "None"
 
         Secondly ->

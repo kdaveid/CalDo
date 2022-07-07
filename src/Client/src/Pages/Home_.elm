@@ -5,6 +5,7 @@ import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route exposing (Route)
 import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, i, input, label, small, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, style, type_, value)
+import Html.Events exposing (onInput)
 import Http
 import Infra exposing (..)
 import Page
@@ -54,6 +55,9 @@ type Msg
     = Loading
     | FetchData
     | OnFetchDataComplete (Result Http.Error (List ToDo))
+    | OnNameChange String
+    | OnDescriptionChange String
+    | OnIntervalChange String
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Cmd Msg )
@@ -70,6 +74,27 @@ update shared msg model =
 
         OnFetchDataComplete (Err err) ->
             ( { model | isFetching = False, message = httpErrorToString err }, Cmd.none )
+
+        OnNameChange newName ->
+            let
+                current =
+                    model.current
+            in
+            ( { model | current = { current | name = newName } }, Cmd.none )
+
+        OnDescriptionChange descr ->
+            let
+                current =
+                    model.current
+            in
+            ( { model | current = { current | description = Just descr } }, Cmd.none )
+
+        OnIntervalChange val ->
+            let
+                current =
+                    model.current
+            in
+            ( { model | current = { current | interval = val |> String.toInt |> Maybe.withDefault 0 } }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -89,34 +114,14 @@ reload mbSession =
 -- VIEW
 
 
-formCheck : List (Html msg) -> Html msg
-formCheck =
-    div [ class "form-check" ]
-
-
-formGroup : List (Html msg) -> Html msg
-formGroup =
-    div [ class "form-group" ]
-
-
-row : List (Html msg) -> Html msg
-row =
-    div [ class "row" ]
-
-
-card : List (Html msg) -> Html msg
-card =
-    div [ class "card" ]
-
-
-view : Model -> View msg
+view : Model -> View Msg
 view model =
     { title = "Homepage"
     , body =
         [ div [ class "container m-3" ]
             [ h1 [] [ text "Welcome to CalDo" ]
             , viewToDoList model.toDos
-            , viewCreate model.current
+            , viewEdit model.current
             ]
         ]
     }
@@ -195,21 +200,26 @@ viewFreqRadio name val lbl =
         ]
 
 
-viewCreate : ToDo -> Html msg
-viewCreate todo =
+viewEdit : ToDo -> Html Msg
+viewEdit todo =
     card
         [ div [ class "card-header" ]
-            [ text "Add new" ]
+            [ if todo.uid == "" then
+                text "Add new"
+
+              else
+                text "Edit"
+            ]
         , div
             [ class "card-body" ]
             [ div [ class "mb-3" ]
                 [ viewLabel [ text "Name" ]
-                , Html.input [ type_ "text", HA.name "name", class "form-control", HA.attribute "aria-describedby" "nameHelp" ] []
+                , Html.input [ type_ "text", HA.name "name", class "form-control", HA.attribute "aria-describedby" "nameHelp", onInput OnNameChange ] []
                 , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Summary / Name of the calendar entry" ]
                 ]
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Description" ]
-                , Html.textarea [ HA.name "description", class "form-control", HA.attribute "aria-describedby" "descriptionHelp" ] []
+                , Html.textarea [ HA.name "description", class "form-control", HA.attribute "aria-describedby" "descriptionHelp", onInput OnDescriptionChange ] []
                 , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
                 ]
             , div [ class "mb-3" ]
@@ -229,7 +239,7 @@ viewCreate todo =
                 ]
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Interval" ]
-                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value "1" ] []
+                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value (String.fromInt todo.interval), onInput OnIntervalChange ] []
                 ]
             , div [ class "mb-3" ]
                 [ viewOrdinalFreqText todo
@@ -248,7 +258,7 @@ viewOrdinalFreqText todo =
 
     else
         case todo.frequency of
-            Never ->
+            None ->
                 viewAlert "Runs once"
 
             Secondly ->
@@ -293,3 +303,23 @@ viewFreqLabel int freq =
 
     else
         viewAlert ("Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s")
+
+
+formCheck : List (Html msg) -> Html msg
+formCheck =
+    div [ class "form-check" ]
+
+
+formGroup : List (Html msg) -> Html msg
+formGroup =
+    div [ class "form-group" ]
+
+
+row : List (Html msg) -> Html msg
+row =
+    div [ class "row" ]
+
+
+card : List (Html msg) -> Html msg
+card =
+    div [ class "card" ]
