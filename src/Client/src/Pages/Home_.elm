@@ -1,9 +1,9 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
-import Data.ToDo exposing (Freqency, ToDo, freqToStr)
+import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route exposing (Route)
-import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, input, label, small, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, i, input, label, small, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, style, type_, value)
 import Http
 import Infra exposing (..)
@@ -33,6 +33,7 @@ type alias Model =
     { message : String
     , error : Maybe String
     , isFetching : Bool
+    , current : ToDo
     , toDos : Maybe (List ToDo)
     }
 
@@ -42,6 +43,7 @@ init shared =
     ( { message = "Nothing to see here "
       , error = Nothing
       , isFetching = False
+      , current = emptyToDo
       , toDos = Nothing
       }
     , reload shared.session
@@ -102,6 +104,11 @@ row =
     div [ class "row" ]
 
 
+card : List (Html msg) -> Html msg
+card =
+    div [ class "card" ]
+
+
 view : Model -> View msg
 view model =
     { title = "Homepage"
@@ -109,7 +116,7 @@ view model =
         [ div [ class "container m-3" ]
             [ h1 [] [ text "Welcome to CalDo" ]
             , viewToDoList model.toDos
-            , viewCreate
+            , viewCreate model.current
             ]
         ]
     }
@@ -143,11 +150,6 @@ viewLabel =
     Html.label [ class "form-label" ]
 
 
-viewToDo : ToDo -> Html msg
-viewToDo todo =
-    div [] [ text todo.name ]
-
-
 viewToDoTblRow : ToDo -> Html msg
 viewToDoTblRow todo =
     tr []
@@ -163,32 +165,39 @@ viewEnabled value =
     div [ class "form-check" ] [ Html.input [ type_ "checkbox", checked value, HA.disabled True ] [] ]
 
 
-radioFormCheck : List (Html.Attribute msg) -> Html msg
-radioFormCheck radioAttrs =
-    let
-        radioButtonAttributes : List (Html.Attribute msg)
-        radioButtonAttributes =
-            [ class "form-check-input" --position-static
-            , type_ "radio"
-            ]
-    in
-    formCheck
-        [ input
-            (radioButtonAttributes ++ radioAttrs)
-            []
-        ]
+
+-- radioFormCheck : List (Html.Attribute msg) -> Html msg
+-- radioFormCheck radioAttrs =
+--     let
+--         radioButtonAttributes : List (Html.Attribute msg)
+--         radioButtonAttributes =
+--             [ class "form-check-input"
+--             , class "form-check-inline" --position-static
+--             , type_ "radio"
+--             ]
+--     in
+--     formCheck
+--         [ input
+--             (radioButtonAttributes ++ radioAttrs)
+--             []
+--         ]
 
 
+viewFreqRadio : String -> String -> String -> Html msg
 viewFreqRadio name val lbl =
+    let
+        defaultAttrib =
+            [ type_ "radio", class "form-check-input", HA.name name, value val ]
+    in
     div [ class "form-check form-check-inline" ]
-        [ input [ type_ "radio", class "form-check-input", HA.name name, value val ] []
+        [ input defaultAttrib []
         , label [ class "form-check-label", HA.for name ] [ text lbl ]
         ]
 
 
-viewCreate : Html msg
-viewCreate =
-    div [ class "card" ]
+viewCreate : ToDo -> Html msg
+viewCreate todo =
+    card
         [ div [ class "card-header" ]
             [ text "Add new" ]
         , div
@@ -196,33 +205,48 @@ viewCreate =
             [ div [ class "mb-3" ]
                 [ viewLabel [ text "Name" ]
                 , Html.input [ type_ "text", HA.name "name", class "form-control", HA.attribute "aria-describedby" "nameHelp" ] []
-                , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Name des Kalender-Eintrags" ]
+                , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Name of the calendar entry" ]
                 ]
             , div [ class "mb-3" ]
                 [ viewLabel [ text "Beschreibung" ]
-                , Html.textarea [ HA.name "description", class "form-control" ] []
+                , Html.textarea [ HA.name "description", class "form-control", HA.attribute "aria-describedby" "descriptionHelp" ] []
+                , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
                 ]
             , div [ class "mb-3" ]
-                [ viewLabel [ text "Wiederholung" ]
+                [ viewLabel [ text "Repeated" ]
                 , div [ class "row g-3" ]
                     [ div [ class "col-auto" ]
-                        [ viewFreqRadio "no-frequency" "none" "Nie"
-                        , viewFreqRadio "second-frequency" "secondly" "Sekündlich"
-                        , viewFreqRadio "minute-frequency" "minutly" "Minütlich"
-                        , viewFreqRadio "hourly-frequency" "hourly" "Stündlich"
-                        , viewFreqRadio "daily-frequency" "daily" "Täglich"
-                        , viewFreqRadio "weekly-frequency" "weekly" "Wöchentlich"
-                        , viewFreqRadio "monthly-frequency" "monthly" "Monatlich"
-                        , viewFreqRadio "yearly-frequency" "yearly" "Jährlich"
+                        [ viewFreqRadio "never-frequency" "never" "Never"
+                        , viewFreqRadio "second-frequency" "secondly" "Secondly"
+                        , viewFreqRadio "minute-frequency" "minutly" "Minutly"
+                        , viewFreqRadio "hourly-frequency" "hourly" "Hourly"
+                        , viewFreqRadio "daily-frequency" "daily" "Daily"
+                        , viewFreqRadio "weekly-frequency" "weekly" "weekly"
+                        , viewFreqRadio "monthly-frequency" "monthly" "Monthly"
+                        , viewFreqRadio "yearly-frequency" "yearly" "Yearly"
                         ]
                     ]
                 ]
             , div [ class "mb-3" ]
-                [ viewLabel [ text "Intervall" ]
+                [ viewLabel [ text "Interval" ]
                 , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value "1" ] []
+                , viewOrdinalFreqText todo
                 ]
             , div [ class "mb-3" ]
                 [ button [ type_ "submit", class "btn btn-primary" ] [ text "Absenden" ]
                 ]
             ]
         ]
+
+
+viewOrdinalFreqText : ToDo -> Html msg
+viewOrdinalFreqText todo =
+    case todo.frequency of
+        Never ->
+            viewLabel [ text "Runs never" ]
+
+        Secondly ->
+            viewLabel [ text ("Runs every " ++ String.fromInt todo.interval ++ " second") ]
+
+        _ ->
+            viewLabel [ text "error" ]

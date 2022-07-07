@@ -1,18 +1,20 @@
-module Data.ToDo exposing (Freqency, ToDo, toDoDecoder, frequencyDecoder, freqToStr)
+module Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr, frequencyDecoder, toDoDecoder)
 
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
 
-type Freqency 
-    =  None
-    |  Secondly
-    |  Minutely
-    |  Hourly
-    |  Daily
-    |  Weekly
-    |  Monthly
-    |  Yearly
-    |  Unknown
+
+type Frequency
+    = Never
+    | Secondly
+    | Minutely
+    | Hourly
+    | Daily
+    | Weekly
+    | Monthly
+    | Yearly
+    | Unknown
+
 
 type alias ToDo =
     { uid : String
@@ -20,10 +22,16 @@ type alias ToDo =
     , description : Maybe String
     , startDT : String
     , endDT : String
-    , frequency : Freqency
+    , frequency : Frequency
     , enabled : Bool
     , interval : Int
     }
+
+
+emptyToDo : ToDo
+emptyToDo =
+    { uid = "", name = "", description = Nothing, startDT = "", endDT = "", frequency = Never, enabled = False, interval = 0 }
+
 
 toDoDecoder : JD.Decoder ToDo
 toDoDecoder =
@@ -38,11 +46,11 @@ toDoDecoder =
         |> JD.required "interval" JD.int
 
 
-frequencyDecoder : String -> JD.Decoder Freqency
+frequencyDecoder : String -> JD.Decoder Frequency
 frequencyDecoder str =
     case str |> String.toLower of
         "none" ->
-            JD.succeed None
+            JD.succeed Never
 
         "secondly" ->
             JD.succeed Secondly
@@ -68,25 +76,33 @@ frequencyDecoder str =
         _ ->
             JD.succeed Unknown
 
-freqToStr : Freqency -> String
+
+freqToStr : Frequency -> String
 freqToStr freq =
     case freq of
-       None ->
-         "None"
-       Secondly ->
-         "Secondly"
-       Minutely ->
-         "Minutely"
-       Hourly ->
-         "Hourly"
-       Daily ->
-         "Daily"
-       Weekly ->
-         "Weekly"
-       Monthly ->
-         "Monthly"
-       Yearly ->
-         "Yearly"
-       Unknown ->
-         "Unknown"
-            
+        Never ->
+            "None"
+
+        Secondly ->
+            "Secondly"
+
+        Minutely ->
+            "Minutely"
+
+        Hourly ->
+            "Hourly"
+
+        Daily ->
+            "Daily"
+
+        Weekly ->
+            "Weekly"
+
+        Monthly ->
+            "Monthly"
+
+        Yearly ->
+            "Yearly"
+
+        Unknown ->
+            "Unknown"
