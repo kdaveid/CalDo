@@ -5,7 +5,7 @@ import Element exposing (html)
 import Element.Font exposing (hairline)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route exposing (Route)
-import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, i, input, label, small, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, button, dd, div, dl, dt, fieldset, h1, h2, h3, i, input, label, p, small, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, style, type_, value)
 import Html.Events exposing (onCheck, onInput)
 import Http
@@ -76,7 +76,7 @@ update shared msg model =
             ( { model | isFetching = False, message = "Loaded", toDos = Just data }, Cmd.none )
 
         OnFetchDataComplete (Err err) ->
-            ( { model | isFetching = False, message = httpErrorToString err }, Cmd.none )
+            ( { model | isFetching = False, error = Just (httpErrorToString err) }, Cmd.none )
 
         OnNameChange newName ->
             let
@@ -130,6 +130,8 @@ view model =
     , body =
         [ div [ class "container m-3" ]
             [ h1 [] [ text "Welcome to CalDo" ]
+            , p [ class "lead" ] [ text "Calender-ToDo (CalDo) - the to do list with history in your calendar." ]
+            , viewErrorMessage model.error
             , viewToDoList model.toDos
             , viewEdit model.current
             ]
@@ -137,27 +139,39 @@ view model =
     }
 
 
+viewErrorMessage : Maybe String -> Html msg
+viewErrorMessage err =
+    case err of
+        Just str ->
+            div [ class "alert alert-warning", HA.attribute "role" "alert" ] [ text str ]
+
+        Nothing ->
+            text ""
+
+
 viewToDoList : Maybe (List ToDo) -> Html msg
 viewToDoList mbTodos =
     case mbTodos of
         Just todos ->
-            div []
-                [ h3 [] [ text "To Do List" ]
-                , table [ class "table" ]
-                    [ thead []
-                        [ tr []
-                            [ th [ HA.scope "col" ] [ text "Name" ]
-                            , th [ HA.scope "col" ] [ text "Frequency" ]
-                            , th [ HA.scope "col" ] [ text "Interval" ]
-                            , th [ HA.scope "col" ] [ text "Enabled" ]
+            div [ class "card mb-3" ]
+                [ div [ class "card-header" ] [ text "To Do List" ]
+                , div [ class "card-body" ]
+                    [ table [ class "table" ]
+                        [ thead []
+                            [ tr []
+                                [ th [ HA.scope "col" ] [ text "Name" ]
+                                , th [ HA.scope "col" ] [ text "Frequency" ]
+                                , th [ HA.scope "col" ] [ text "Interval" ]
+                                , th [ HA.scope "col" ] [ text "Enabled" ]
+                                ]
                             ]
+                        , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                         ]
-                    , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                     ]
                 ]
 
         Nothing ->
-            div [] [ text "No ToDos found - create one!" ]
+            div [ class "alert alert-info", HA.attribute "role" "alert" ] [ text "No ToDos found - create one!" ]
 
 
 viewLabel : List (Html msg) -> Html msg
