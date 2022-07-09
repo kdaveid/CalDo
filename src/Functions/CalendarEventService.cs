@@ -1,15 +1,10 @@
-﻿using Ical.Net;
-using Ical.Net.CalendarComponents;
-using Ical.Net.Serialization;
+﻿using Ical.Net.Serialization;
+using static CalDo.Constants;
 
 namespace CalDo.Functions
 {
     public class CalendarEventService
     {
-        private static readonly string RootPath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
-        private static readonly string ToDoPath = Path.Combine(RootPath, "ToDoItems");
-        private static readonly string ToDoDisabledPath = Path.Combine(ToDoPath, "Disabled");
-
         public IEnumerable<CalendarEvent> GetAll()
         {
             var files = Directory.GetFiles(ToDoPath, "*.ics").ToList();

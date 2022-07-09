@@ -1,11 +1,12 @@
 ﻿using CalDo.Models;
+using static CalDo.Constants;
 
 namespace CalDo.Functions
 {
     public class ToDoEventService
     {
-        private static readonly string RootPath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
-        private static readonly string EventsPath = Path.Combine(RootPath, "Events");
+        private static string SerializeEvent(ToDoEvent e) => System.Text.Json.JsonSerializer.Serialize(e);
+        private static string FilePath(ToDoEvent item) => Path.Combine(EventsPath, $"{item.CalendarEventId}_{item.EventId}.json");
 
         public IEnumerable<ToDoEvent> GetAll(string calendarEventId)
         {
@@ -44,9 +45,5 @@ namespace CalDo.Functions
                 File.Delete(filePath);
             }
         }
-
-        private static string SerializeEvent(ToDoEvent e) => System.Text.Json.JsonSerializer.Serialize(e);
-        private static string FilePath(ToDoEvent item) => Path.Combine(EventsPath, $"{item.CalendarEventId}_{item.EventId}.json");
-
     }
 }
