@@ -1,7 +1,4 @@
 ﻿using CalDo.Functions;
-using Ical.Net;
-using Ical.Net.CalendarComponents;
-using Ical.Net.DataTypes;
 
 namespace CalDo.Models
 {
@@ -23,6 +20,8 @@ namespace CalDo.Models
 
         public int Interval { get; set; }
 
+        public string? Alarm { get; set; }
+
         public static ToDoVM From(CalendarEvent evt)
         {
             var rule = evt.RecurrenceRules.FirstOrDefault();
@@ -36,6 +35,22 @@ namespace CalDo.Models
                 ival = rule.Interval;
             }
 
+
+            var defaultAlarm = new Alarm
+            {
+                Action = AlarmAction.Display,
+                Description = "Reminder",
+                Trigger = new Trigger(TimeSpan.Zero)
+            };
+
+            var serializedAlarm = new TriggerSerializer().SerializeToString(defaultAlarm);
+
+            if (evt.Alarms.Any())
+            {
+                serializedAlarm = new TriggerSerializer().SerializeToString(evt.Alarms.First());
+            }
+
+
             return new ToDoVM
             {
                 Uid = evt.Uid,
@@ -45,21 +60,29 @@ namespace CalDo.Models
                 EndDT = evt.DtEnd.HasDate ? evt.DtEnd.Date : null,
                 Frequency = freq.ToString(),
                 Interval = ival,
+                Alarm = serializedAlarm// evt.Alarms.Any() ? evt.Alarms.First().
             };
         }
 
         internal static CalendarEvent ToCalendarEvent(ToDoVM item)
         {
-            return new CalendarEvent
+            var @event = new CalendarEvent
             {
                 Uid = item.Uid,
+                Class = "PUBLIC",
                 Summary = item.Name,
                 Description = item.Description,
                 DtStart = item.StartDT.HasValue ? new CalDateTime(item.StartDT.Value) : null,
                 DtEnd = item.EndDT.HasValue ? new CalDateTime(item.EndDT.Value) : null,
-                Url = new Uri($"http://homecal.schatzinos.net/{item.Uid}"),
-                RecurrenceRules = new List<RecurrencePattern> { new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval) }
+                Url = new Uri($"http://caldo.schatzinos.net/{item.Uid}"),
+                RecurrenceRules = new List<RecurrencePattern> { new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval) },
             };
+            if (item.Alarm is not null)
+            {
+                @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm)));
+            }
+
+            return @event;
         }
 
     }

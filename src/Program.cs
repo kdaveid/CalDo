@@ -1,3 +1,8 @@
+global using Ical.Net;
+global using Ical.Net.CalendarComponents;
+global using Ical.Net.DataTypes;
+global using Ical.Net.Serialization.DataTypes;
+
 using CalDo.Functions;
 
 var builder = WebApplication.CreateBuilder(args);

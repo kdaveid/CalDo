@@ -1,4 +1,4 @@
-module Request.Util exposing (apiUrl, apiUrlArr, getJson, getJsonTask, httpErrorToString, resolver)
+module Request.Util exposing (apiUrl, apiUrlArr, getJson, getJsonTask, getString, httpErrorToString, resolver)
 
 import Http
 import Json.Decode as JD
@@ -33,6 +33,14 @@ getJson url msg decoder =
         , expect = Http.expectJson msg decoder
         , timeout = Nothing
         , tracker = Nothing
+        }
+
+
+getString : String -> (Result Http.Error String -> msg) -> Cmd msg
+getString url msg =
+    Http.get
+        { url = url
+        , expect = Http.expectString msg
         }
 
 

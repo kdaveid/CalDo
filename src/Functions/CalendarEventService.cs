@@ -46,7 +46,7 @@ namespace CalDo.Functions
                 return null;
             }
 
-            using var fs = new FileStream(filePath, FileMode.Open);
+            using var fs = new FileStream(filePath, FileMode.Open,FileAccess.Read);
             var cal = Calendar.Load(fs);
 
             return cal.Events.First();
