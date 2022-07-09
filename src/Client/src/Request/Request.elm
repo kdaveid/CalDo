@@ -1,4 +1,4 @@
-module Request.Request exposing (getPlainTextCal, getToDo, getToDos, saveToDo)
+module Request.Request exposing (getNewToDo, getPlainTextCal, getToDo, getToDos, saveToDo)
 
 import Data.ToDo exposing (ToDo, toDoDecoder, toDoEncoder)
 import Http
@@ -19,6 +19,16 @@ getToDo : String -> String -> (WebData ToDo -> msg) -> Cmd msg
 getToDo host id msg =
     Http.get
         { url = apiUrlArr host [ "todo", id ]
+        , expect =
+            toDoDecoder
+                |> Http.expectJson (RemoteData.fromResult >> msg)
+        }
+
+
+getNewToDo : String -> (WebData ToDo -> msg) -> Cmd msg
+getNewToDo host msg =
+    Http.get
+        { url = apiUrlArr host [ "todo", "create" ]
         , expect =
             toDoDecoder
                 |> Http.expectJson (RemoteData.fromResult >> msg)

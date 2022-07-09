@@ -15,10 +15,17 @@ public class ToDoController : ControllerBase
         _service = service;
     }
 
-    [HttpGet("create", Name = "CreateNew")]
+    [HttpGet("create")]
     public ToDoVM New()
     {
-        return new ToDoVM { Uid = Guid.NewGuid().ToString(), StartDT = DateTime.Now, EndDT = DateTime.Now.AddHours(1) };
+        return new ToDoVM
+        {
+            Uid = Guid.NewGuid().ToString(),
+            Name = "new",
+            StartDT = DateTime.Now,
+            EndDT = DateTime.Now.AddHours(1),
+            Frequency = FrequencyType.Monthly.ToString()
+        };
     }
 
     [HttpGet(Name = "GetAll")]

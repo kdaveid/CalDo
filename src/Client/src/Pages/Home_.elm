@@ -110,7 +110,7 @@ view model =
     , body =
         [ div [ class "container m-3" ]
             [ h1 [] [ text "Welcome to CalDo" ]
-            , p [ class "lead" ] [ text "Calender-ToDo (CalDo) - the to do list with history in your calendar." ]
+            , p [ class "lead" ] [ text "Calendar-ToDo-List – the to do list with history in your calendar." ]
             , viewErrorMessage model.error
             , viewToDoList model.toDos
             ]
@@ -132,25 +132,37 @@ viewToDoList : Maybe (List ToDo) -> Html msg
 viewToDoList mbTodos =
     case mbTodos of
         Just todos ->
-            div [ class "card mb-3" ]
-                [ div [ class "card-header" ] [ text "To Do List" ]
-                , div [ class "card-body" ]
-                    [ table [ class "table" ]
-                        [ thead []
-                            [ tr []
-                                [ th [ HA.scope "col" ] [ text "Name" ]
-                                , th [ HA.scope "col" ] [ text "Frequency" ]
-                                , th [ HA.scope "col" ] [ text "Interval" ]
-                                , th [ HA.scope "col" ] [ text "Enabled" ]
+            if List.length todos > 1 then
+                div [ class "card mb-3" ]
+                    [ div [ class "card-header" ] [ text "To Do List" ]
+                    , div [ class "card-body" ]
+                        [ table [ class "table" ]
+                            [ thead []
+                                [ tr []
+                                    [ th [ HA.scope "col" ] [ text "Name" ]
+                                    , th [ HA.scope "col" ] [ text "Frequency" ]
+                                    , th [ HA.scope "col" ] [ text "Interval" ]
+                                    , th [ HA.scope "col" ] [ text "Enabled" ]
+                                    ]
                                 ]
+                            , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                             ]
-                        , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                         ]
                     ]
-                ]
+
+            else
+                viewInfo
 
         Nothing ->
-            div [ class "alert alert-info", HA.attribute "role" "alert" ] [ text "No ToDos found - create one!" ]
+            viewInfo
+
+
+viewInfo : Html msg
+viewInfo =
+    div [ class "alert alert-info", HA.attribute "role" "alert" ]
+        [ text "No ToDos found - "
+        , viewLink "create one!" (Route.Edit__Id_ { id = "new" })
+        ]
 
 
 viewToDoTblRow : ToDo -> Html msg
