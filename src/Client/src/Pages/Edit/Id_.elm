@@ -370,6 +370,7 @@ viewButtons =
         [ div [ class "control" ]
             [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
             , button [ type_ "button", class "button is-danger", onClick (OnDeleteModal True) ] [ text "Delete" ]
+            , button [ type_ "button", class "button is-light" ] [ text "Cancel" ]
             ]
         ]
 
