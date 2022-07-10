@@ -4,11 +4,11 @@ import Browser.Navigation exposing (Key, pushUrl)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
 import Extras.Html exposing (viewLabel)
 import Gen.Params.Edit.Id_ exposing (Params)
-import Html exposing (Html, button, div, h3, input, label, text)
-import Html.Attributes as HA exposing (checked, class, style, type_, value)
+import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
+import Html.Attributes as HA exposing (attribute, checked, class, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Infra exposing (Session)
-import Json.Decode exposing (bool)
+import Json.Decode as Decode exposing (bool)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
@@ -69,7 +69,7 @@ type Msg
     | OnEndChanged String
     | OnSave
     | OnSaveComplete (WebData ToDo)
-    | OnDeleteModal
+    | OnDeleteModal Bool
     | OnDelete
     | OnDeleteComplete (WebData ToDo)
 
@@ -109,8 +109,8 @@ update mbSession pageKey msg model =
         OnSaveComplete data ->
             ( { model | todo = data }, RemoteData.map (\s -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
 
-        OnDeleteModal ->
-            ( { model | viewDeleteModal = True }, Cmd.none )
+        OnDeleteModal show ->
+            ( { model | viewDeleteModal = show }, Cmd.none )
 
         OnDelete ->
             ( model, model.todo |> RemoteData.map (delete mbSession) |> RemoteData.withDefault Cmd.none )
@@ -157,9 +157,10 @@ viewToDoOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success todo ->
-            div [ class "container" ]
+            div []
                 [ viewEdit todo
-                , viewDeleteModal model
+
+                --, renderModal model
                 ]
 
         RemoteData.Failure httpError ->
@@ -183,8 +184,10 @@ viewDeleteModal model =
     case model.todo of
         RemoteData.Success todo ->
             if model.viewDeleteModal then
-                div [ class "modal", HA.attribute "tabIndex" "-1" ]
-                    [ div [ class "modal-dialog" ]
+                div
+                    [ class "modal" ]
+                    [ div
+                        [ class "modal-dialog" ]
                         [ div [ class "modal-content" ]
                             [ div [ class "modal-header" ]
                                 [ div [ class "modal-title" ] [ Html.h5 [] [ text ("Delete " ++ todo.name) ] ]
@@ -193,7 +196,7 @@ viewDeleteModal model =
                                 [ Html.p [] [ text "Do you really want to delete it?" ]
                                 ]
                             , div [ class "modal-footer" ]
-                                [ button [ type_ "button", class "btn btn-secondary", HA.attribute "data-bs-dismiss" "modal" ] [ text "Close" ]
+                                [ button [ type_ "button", class "btn btn-secondary", attribute "data-bs-dismiss" "modal" ] [ text "Close" ]
                                 , button [ type_ "button", class "btn btn-danger", onClick OnDelete ] [ text "Delete" ]
                                 ]
                             ]
@@ -201,109 +204,172 @@ viewDeleteModal model =
                     ]
 
             else
-                text ""
+                div [] []
 
         _ ->
-            text ""
+            div [] []
+
+
+renderModal : Model -> Html Msg
+renderModal model =
+    div [ class "modal is-active", attribute "aria-label" "Modal title" ]
+        [ div [ class "modal-background", onClick (OnDeleteModal False) ]
+            []
+        , div [ class "modal-card" ]
+            [ header [ class "modal-card-head" ]
+                [ p [ class "modal-card-title" ]
+                    [ text "Modal title" ]
+                , button [ class "delete", onClick OnDelete, attribute "aria-label" "close" ]
+                    []
+                ]
+            , section [ class "modal-card-body" ]
+                [ text "Modal contents" ]
+            , footer [ class "modal-card-foot" ]
+                [ button [ type_ "button", class "btn is-secondary is-active", onClick (OnDeleteModal False) ] [ text "Cancel" ]
+                , button [ type_ "button", class "btn is-danger", onClick OnDelete ] [ text "Delete" ]
+                ]
+            ]
+        ]
 
 
 viewEdit : ToDo -> Html Msg
 viewEdit todo =
-    div [ class "card" ]
-        [ div [ class "card-header" ]
-            [ text "Edit" ]
-        , div
-            [ class "card-body" ]
-            [ div [ class "mb-3" ]
-                [ viewLabel [ text "Name" ]
-                , Html.input [ type_ "text", HA.name "name", HA.placeholder "Clean the washmaschine", class "form-control", HA.attribute "aria-describedby" "nameHelp", onInput OnNameChange, value todo.name ] []
-                , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Summary / Name of the calendar entry" ]
-                ]
-            , div [ class "mb-3" ]
-                [ viewLabel [ text "Description" ]
-                , Html.textarea
-                    [ HA.name "description"
-                    , HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry"
-                    , class "form-control"
-                    , HA.attribute "rows" "4"
-                    , HA.attribute "aria-describedby" "descriptionHelp"
-                    , value todo.description
-                    , onInput OnDescriptionChange
+    div [ class "section" ]
+        [ div [ class "card" ]
+            [ div [ class "card-header" ]
+                [ p [ class "card-header-title" ] [ text "Edit" ] ]
+            , div
+                [ class "card-content" ]
+                [ div [ class "mb-3" ]
+                    [ viewLabel [ text "Name" ]
+                    , div [ class "control" ]
+                        [ input [ type_ "text", class "input", HA.name "name", HA.placeholder "Clean the washmaschine", class "form-control", attribute "aria-describedby" "nameHelp", onInput OnNameChange, value todo.name ] []
+                        ]
+                    , p [ class "help" ] [ text "Summary / Name of the calendar entry" ]
                     ]
-                    []
-                , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
+                , div [ class "mb-3" ]
+                    [ viewLabel [ text "Description" ]
+                    , div [ class "control" ]
+                        [ textarea
+                            [ HA.name "description"
+                            , HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry"
+                            , class "textarea"
+                            , attribute "rows" "4"
+                            , attribute "aria-describedby" "descriptionHelp"
+                            , value todo.description
+                            , onInput OnDescriptionChange
+                            ]
+                            []
+                        ]
+                    , p [ class "help" ] [ text "Calendar entry content" ]
+                    ]
+                , viewStartEnd todo
+                , viewAlarm todo
+                , viewRepetition todo
+                , viewInterval todo
+                , viewOrdinalFreqText todo
+                , viewButtons
                 ]
-            , div [ class "row" ]
-                [ div [ class "col-md-12 mb-3" ]
-                    [ viewLabel [ text "Start" ]
-                    , Html.input
+            ]
+        ]
+
+
+viewInterval : ToDo -> Html Msg
+viewInterval todo =
+    block
+        [ div [ class "control" ]
+            [ viewLabel [ text "Interval" ]
+            , input [ type_ "number", class "input", HA.name "interval", HA.value (todo.interval |> String.fromInt), onInput OnIntervalChange ] []
+            ]
+        ]
+
+
+block : List (Html msg) -> Html msg
+block =
+    div [ class "block" ]
+
+
+viewRepetition : ToDo -> Html Msg
+viewRepetition todo =
+    block
+        [ viewLabel [ text "Repetition" ]
+        , div [ class "control" ]
+            [ viewFreqRadio "none" "Never" (todo.frequency == Data.ToDo.None)
+            , viewFreqRadio "secondly" "Secondly" (todo.frequency == Data.ToDo.Secondly)
+            , viewFreqRadio "minutely" "Minutely" (todo.frequency == Data.ToDo.Minutely)
+            , viewFreqRadio "hourly" "Hourly" (todo.frequency == Data.ToDo.Hourly)
+            , viewFreqRadio "daily" "Daily" (todo.frequency == Data.ToDo.Daily)
+            , viewFreqRadio "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
+            , viewFreqRadio "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
+            , viewFreqRadio "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
+            ]
+        ]
+
+
+viewAlarm : ToDo -> Html msg
+viewAlarm todo =
+    block
+        [ div [ class "control" ]
+            [ viewLabel [ text "Alarm" ]
+            , div [ class "select" ]
+                [ select []
+                    [ option [ value "N" ] [ text "None" ]
+                    , option [ value "0M" ] [ text "0 mintutes" ]
+                    , option [ value "30M" ] [ text "30 mintutes" ]
+                    , option [ value "1H" ] [ text "1 hour" ]
+                    , option [ value "4H" ] [ text "4 hours" ]
+                    , option [ value "12H" ] [ text "12 hours" ]
+                    , option [ value "1D" ] [ text "1 day" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+viewStartEnd : { a | startDT : String, endDT : String } -> Html Msg
+viewStartEnd todo =
+    block
+        [ div [ class "columns" ]
+            [ div [ class "column" ]
+                [ viewLabel [ text "Start" ]
+                , div [ class "control" ]
+                    [ input
                         [ type_ "datetime-local"
-                        , HA.name "start"
-                        , class "form-control"
+                        , class "input"
                         , value (subStrDate todo.startDT)
                         , onInput OnStartChanged
                         ]
                         []
                     ]
-                , div [ class "col-md-6 mb-3" ]
-                    [ viewLabel [ text "End" ]
-                    , Html.input
+                ]
+            , div [ class "column" ]
+                [ viewLabel [ text "End" ]
+                , div [ class "control" ]
+                    [ input
                         [ type_ "datetime-local"
-                        , HA.name "end"
-                        , class "form-control"
+                        , class "input"
                         , value (subStrDate todo.endDT)
                         , onInput OnEndChanged
                         ]
                         []
                     ]
-                , div [ class "col-md-6 mb-3" ]
-                    [ Html.label [ class "form-label" ] [ text "" ]
-                    , div [ class "form-check mt-3" ]
-                        [ Html.input [ HA.id "noEnd", type_ "checkbox", class "form-check-input" ] []
-                        , Html.label [ class "form-check-label", HA.attribute "for" "noEnd" ] [ text "Open End" ]
-                        ]
+                ]
+            , div [ class "column" ]
+                [ viewLabel [ text "Open End" ]
+                , div [ class "control" ]
+                    [ input [ type_ "checkbox", class "checkbox" ] []
                     ]
                 ]
-            , div [ class "mb-3" ]
-                [ viewLabel [ text "Alarm" ]
-                , Html.select [ HA.name "alarm", class "form-select" ]
-                    [ Html.option [ value "N" ] [ text "None" ]
-                    , Html.option [ value "0M" ] [ text "0 mintutes" ]
-                    , Html.option [ value "30M" ] [ text "30 mintutes" ]
-                    , Html.option [ value "1H" ] [ text "1 hour" ]
-                    , Html.option [ value "4H" ] [ text "4 hours" ]
-                    , Html.option [ value "12H" ] [ text "12 hours" ]
-                    , Html.option [ value "1D" ] [ text "1 day" ]
-                    ]
-                ]
-            , div [ class "mb-3" ]
-                [ viewLabel [ text "Repetition" ]
-                , div [ class "row g-3" ]
-                    [ div [ class "col-auto" ]
-                        [ viewFreqRadio "none-frequency" "none" "Never" (todo.frequency == Data.ToDo.None)
-                        , viewFreqRadio "second-frequency" "secondly" "Secondly" (todo.frequency == Data.ToDo.Secondly)
-                        , viewFreqRadio "minute-frequency" "minutely" "Minutely" (todo.frequency == Data.ToDo.Minutely)
-                        , viewFreqRadio "hourly-frequency" "hourly" "Hourly" (todo.frequency == Data.ToDo.Hourly)
-                        , viewFreqRadio "daily-frequency" "daily" "Daily" (todo.frequency == Data.ToDo.Daily)
-                        , viewFreqRadio "weekly-frequency" "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
-                        , viewFreqRadio "monthly-frequency" "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
-                        , viewFreqRadio "yearly-frequency" "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
-                        ]
-                    ]
-                ]
-            , div [ class "mb-3" ]
-                [ viewLabel [ text "Interval" ]
-                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value (todo.interval |> String.fromInt), onInput OnIntervalChange ] []
-                ]
-            , div [ class "mb-3" ]
-                [ viewOrdinalFreqText todo
-                ]
-            , div [ class "row mb-3" ]
-                [ div [ class "col-auto" ]
-                    [ button [ type_ "submit", class "btn btn-primary me-2", onClick OnSave ] [ text "Save" ]
-                    , button [ type_ "button", class "btn btn-danger", onClick OnDeleteModal ] [ text "Delete" ]
-                    ]
-                ]
+            ]
+        ]
+
+
+viewButtons : Html Msg
+viewButtons =
+    div [ class "block" ]
+        [ div [ class "control" ]
+            [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+            , button [ type_ "button", class "button is-danger", onClick (OnDeleteModal True) ] [ text "Delete" ]
             ]
         ]
 
@@ -311,10 +377,6 @@ viewEdit todo =
 subStrDate : String -> String
 subStrDate dt =
     String.left 16 dt
-
-
-
---2018-06-12T19:30
 
 
 viewOrdinalFreqText : ToDo -> Html msg
@@ -352,14 +414,9 @@ viewOrdinalFreqText todo =
                 viewAlert "Unknown - an error!"
 
 
-
--- _ ->
---     viewLabel [ text "error" ]
-
-
 viewAlert : String -> Html msg
 viewAlert str =
-    div [ class "alert alert-primary", HA.attribute "role" "alert" ] [ text str ]
+    div [ class "notification is-info is-light" ] [ text str ]
 
 
 viewFreqLabel : Int -> String -> Html msg
@@ -371,20 +428,20 @@ viewFreqLabel int freq =
         viewAlert ("Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s")
 
 
-viewFreqRadio : String -> String -> String -> Bool -> Html Msg
-viewFreqRadio name val lbl checked =
+viewFreqRadio : String -> String -> Bool -> Html Msg
+viewFreqRadio val lbl checked =
     let
         checkedAttrib =
             if checked then
-                [ HA.attribute "checked" "checked" ]
+                [ attribute "checked" "checked" ]
 
             else
                 []
 
         defaultAttrib =
-            [ type_ "radio", class "form-check-input", HA.id name, HA.name "frequency", value val ]
+            [ type_ "radio", HA.name "frequency", value val, onInput OnFrequencyChange ]
     in
-    div [ class "form-check form-check-inline" ]
-        [ input (defaultAttrib ++ onInput OnFrequencyChange :: checkedAttrib) []
-        , label [ class "form-check-label", HA.for name ] [ text lbl ]
+    label [ class "radio" ]
+        [ input (defaultAttrib ++ checkedAttrib) []
+        , text lbl
         ]

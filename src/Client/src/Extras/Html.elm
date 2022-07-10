@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, href)
 
 viewLabel : List (Html msg) -> Html msg
 viewLabel =
-    Html.label [ class "form-label" ]
+    Html.label [ class "label" ]
 
 
 viewLink : String -> Route -> Html msg

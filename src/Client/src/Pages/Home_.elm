@@ -108,11 +108,13 @@ view : Model -> View Msg
 view model =
     { title = "Homepage"
     , body =
-        [ div [ class "container m-3" ]
-            [ h1 [] [ text "Welcome to CalDo" ]
-            , p [ class "lead" ] [ text "Calendar-ToDo-List – the to do list with history in your calendar." ]
-            , viewErrorMessage model.error
-            , viewToDoList model.toDos
+        [ div [ class "section" ]
+            [ div [ class "container" ]
+                [ h1 [ class "title" ] [ text "Welcome to CalDo" ]
+                , p [ class "subtitle" ] [ text "Calendar-ToDo-List – the to do list with history in your calendar." ]
+                , viewErrorMessage model.error
+                , viewToDoList model.toDos
+                ]
             ]
         ]
     }
@@ -133,9 +135,9 @@ viewToDoList mbTodos =
     case mbTodos of
         Just todos ->
             if List.length todos >= 1 then
-                div [ class "card mb-3" ]
-                    [ div [ class "card-header" ] [ text "To Do List" ]
-                    , div [ class "card-body" ]
+                div [ class "card" ]
+                    [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text "To Do List" ] ]
+                    , div [ class "card-content" ]
                         [ table [ class "table" ]
                             [ thead []
                                 [ tr []
@@ -147,8 +149,8 @@ viewToDoList mbTodos =
                                 ]
                             , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                             ]
-                        , viewAddLink
                         ]
+                    , div [ class "card-footer" ] [ viewAddLink ]
                     ]
 
             else
@@ -160,14 +162,12 @@ viewToDoList mbTodos =
 
 viewAddLink : Html msg
 viewAddLink =
-    div [ class "row" ]
-        [ viewLink "Add one" (Route.Edit__Id_ { id = "new" })
-        ]
+    viewLink "Add one" (Route.Edit__Id_ { id = "new" })
 
 
 viewInfo : Html msg
 viewInfo =
-    div [ class "alert alert-info", HA.attribute "role" "alert" ]
+    div [ class "notification" ]
         [ text "No ToDos found - "
         , viewLink "create one!" (Route.Edit__Id_ { id = "new" })
         ]
