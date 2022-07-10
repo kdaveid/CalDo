@@ -1,3 +1,4 @@
+using System.Net;
 using CalDo.Functions;
 using CalDo.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ public class ToDoController : ControllerBase
             Name = "new",
             StartDT = DateTime.Now,
             EndDT = DateTime.Now.AddHours(1),
+            Interval = 1,
             Frequency = FrequencyType.Monthly.ToString()
         };
     }
@@ -59,5 +61,19 @@ public class ToDoController : ControllerBase
     {
         _service.Save(ToDoVM.ToCalendarEvent(item), item.Enabled);
         return item;
+    }
+
+    [HttpPost("delete")]
+    [ProducesResponseType(typeof(ToDoVM), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(ToDoVM), (int)HttpStatusCode.NotFound)]
+    public IActionResult Delete([FromBody] ToDoVM item)
+    {
+        if (item.Uid == null)
+        {
+            return NotFound(item);
+        }
+
+        _service.Delete(item.Uid);
+        return Ok(item);
     }
 }

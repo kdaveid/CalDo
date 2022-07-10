@@ -41,7 +41,7 @@ namespace CalDo.Functions
                 return null;
             }
 
-            using var fs = new FileStream(filePath, FileMode.Open,FileAccess.Read);
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             var cal = Calendar.Load(fs);
 
             return cal.Events.First();
@@ -61,6 +61,21 @@ namespace CalDo.Functions
             {
                 WriteFile(item, disabledFilePath);
                 DeleteFileIfExists(enabledFilePath);
+            }
+        }
+
+        public void Delete(string uid)
+        {
+            var enabledFilePath = Path.Combine(ToDoPath, $"{uid}.ics");
+            var disabledFilePath = Path.Combine(ToDoDisabledPath, $"{uid}.ics");
+
+            if (File.Exists(enabledFilePath))
+            {
+                DeleteFileIfExists(enabledFilePath);
+            }
+            else if (File.Exists(disabledFilePath))
+            {
+                DeleteFileIfExists(disabledFilePath);
             }
         }
 

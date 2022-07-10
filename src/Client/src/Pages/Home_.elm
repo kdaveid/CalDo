@@ -132,7 +132,7 @@ viewToDoList : Maybe (List ToDo) -> Html msg
 viewToDoList mbTodos =
     case mbTodos of
         Just todos ->
-            if List.length todos > 1 then
+            if List.length todos >= 1 then
                 div [ class "card mb-3" ]
                     [ div [ class "card-header" ] [ text "To Do List" ]
                     , div [ class "card-body" ]
@@ -147,6 +147,7 @@ viewToDoList mbTodos =
                                 ]
                             , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                             ]
+                        , viewAddLink
                         ]
                     ]
 
@@ -155,6 +156,13 @@ viewToDoList mbTodos =
 
         Nothing ->
             viewInfo
+
+
+viewAddLink : Html msg
+viewAddLink =
+    div [ class "row" ]
+        [ viewLink "Add one" (Route.Edit__Id_ { id = "new" })
+        ]
 
 
 viewInfo : Html msg
@@ -168,7 +176,7 @@ viewInfo =
 viewToDoTblRow : ToDo -> Html msg
 viewToDoTblRow todo =
     tr []
-        [ th [ HA.scope "row" ] [ viewLink todo.name (Route.Edit__Id_ { id = todo.name }) ]
+        [ th [ HA.scope "row" ] [ viewLink todo.name (Route.Edit__Id_ { id = todo.uid }) ]
         , td [] [ text (freqToStr todo.frequency) ]
         , td [] [ text (String.fromInt todo.interval) ]
         , td [] [ viewEnabled todo.enabled ]

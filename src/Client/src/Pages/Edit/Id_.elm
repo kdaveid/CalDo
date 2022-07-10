@@ -8,10 +8,11 @@ import Html exposing (Html, button, div, h3, input, label, text)
 import Html.Attributes as HA exposing (checked, class, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Infra exposing (Session)
+import Json.Decode exposing (bool)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
-import Request.Request exposing (getNewToDo, getToDo, saveToDo)
+import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared
 import View exposing (View)
@@ -34,12 +35,13 @@ page shared req =
 type alias Model =
     { todo : WebData ToDo
     , error : Maybe String
+    , viewDeleteModal : Bool
     }
 
 
 init : Maybe Session -> String -> ( Model, Cmd Msg )
 init mbSession todoId =
-    ( { todo = Loading, error = Nothing }
+    ( { todo = Loading, error = Nothing, viewDeleteModal = False }
     , Maybe.map
         (\c ->
             if todoId == "new" then
@@ -67,6 +69,9 @@ type Msg
     | OnEndChanged String
     | OnSave
     | OnSaveComplete (WebData ToDo)
+    | OnDeleteModal
+    | OnDelete
+    | OnDeleteComplete (WebData ToDo)
 
 
 updateToDo : (ToDo -> ToDo) -> WebData ToDo -> WebData ToDo
@@ -104,10 +109,24 @@ update mbSession pageKey msg model =
         OnSaveComplete data ->
             ( { model | todo = data }, RemoteData.map (\s -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
 
+        OnDeleteModal ->
+            ( { model | viewDeleteModal = True }, Cmd.none )
+
+        OnDelete ->
+            ( model, model.todo |> RemoteData.map (delete mbSession) |> RemoteData.withDefault Cmd.none )
+
+        OnDeleteComplete data ->
+            ( model, RemoteData.map (\s -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
+
 
 save : Maybe Session -> ToDo -> Cmd Msg
 save mbSession todo =
     Maybe.map (\s -> saveToDo s.origin todo OnSaveComplete) mbSession |> Maybe.withDefault Cmd.none
+
+
+delete : Maybe Session -> ToDo -> Cmd Msg
+delete mbSession todo =
+    Maybe.map (\s -> deleteToDo s.origin todo OnDeleteComplete) mbSession |> Maybe.withDefault Cmd.none
 
 
 
@@ -138,7 +157,10 @@ viewToDoOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success todo ->
-            viewEdit todo
+            div [ class "container" ]
+                [ viewEdit todo
+                , viewDeleteModal model
+                ]
 
         RemoteData.Failure httpError ->
             viewError (httpErrorToString httpError)
@@ -156,105 +178,130 @@ viewError errorMessage =
         ]
 
 
+viewDeleteModal : Model -> Html Msg
+viewDeleteModal model =
+    case model.todo of
+        RemoteData.Success todo ->
+            if model.viewDeleteModal then
+                div [ class "modal", HA.attribute "tabIndex" "-1" ]
+                    [ div [ class "modal-dialog" ]
+                        [ div [ class "modal-content" ]
+                            [ div [ class "modal-header" ]
+                                [ div [ class "modal-title" ] [ Html.h5 [] [ text ("Delete " ++ todo.name) ] ]
+                                ]
+                            , div [ class "modal-body" ]
+                                [ Html.p [] [ text "Do you really want to delete it?" ]
+                                ]
+                            , div [ class "modal-footer" ]
+                                [ button [ type_ "button", class "btn btn-secondary", HA.attribute "data-bs-dismiss" "modal" ] [ text "Close" ]
+                                , button [ type_ "button", class "btn btn-danger", onClick OnDelete ] [ text "Delete" ]
+                                ]
+                            ]
+                        ]
+                    ]
+
+            else
+                text ""
+
+        _ ->
+            text ""
+
+
 viewEdit : ToDo -> Html Msg
 viewEdit todo =
-    div [ class "container" ]
-        [ div [ class "card" ]
-            [ div [ class "card-header" ]
-                [ if todo.name == "new" then
-                    text "Add new"
-
-                  else
-                    text "Edit"
+    div [ class "card" ]
+        [ div [ class "card-header" ]
+            [ text "Edit" ]
+        , div
+            [ class "card-body" ]
+            [ div [ class "mb-3" ]
+                [ viewLabel [ text "Name" ]
+                , Html.input [ type_ "text", HA.name "name", HA.placeholder "Clean the washmaschine", class "form-control", HA.attribute "aria-describedby" "nameHelp", onInput OnNameChange, value todo.name ] []
+                , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Summary / Name of the calendar entry" ]
                 ]
-            , div
-                [ class "card-body" ]
-                [ div [ class "mb-3" ]
-                    [ viewLabel [ text "Name" ]
-                    , Html.input [ type_ "text", HA.name "name", HA.placeholder "Clean the washmaschine", class "form-control", HA.attribute "aria-describedby" "nameHelp", onInput OnNameChange, value todo.name ] []
-                    , div [ class "form-text", HA.attribute "id" "nameHelp" ] [ text "Summary / Name of the calendar entry" ]
+            , div [ class "mb-3" ]
+                [ viewLabel [ text "Description" ]
+                , Html.textarea
+                    [ HA.name "description"
+                    , HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry"
+                    , class "form-control"
+                    , HA.attribute "rows" "4"
+                    , HA.attribute "aria-describedby" "descriptionHelp"
+                    , value todo.description
+                    , onInput OnDescriptionChange
                     ]
-                , div [ class "mb-3" ]
-                    [ viewLabel [ text "Description" ]
-                    , Html.textarea
-                        [ HA.name "description"
-                        , HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry"
+                    []
+                , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
+                ]
+            , div [ class "row" ]
+                [ div [ class "col-md-12 mb-3" ]
+                    [ viewLabel [ text "Start" ]
+                    , Html.input
+                        [ type_ "datetime-local"
+                        , HA.name "start"
                         , class "form-control"
-                        , HA.attribute "rows" "4"
-                        , HA.attribute "aria-describedby" "descriptionHelp"
-                        , value todo.description
-                        , onInput OnDescriptionChange
+                        , value (subStrDate todo.startDT)
+                        , onInput OnStartChanged
                         ]
                         []
-                    , div [ class "form-text", HA.attribute "id" "descriptionHelp" ] [ text "Calendar entry content" ]
                     ]
-                , div [ class "row" ]
-                    [ div [ class "col-md-12 mb-3" ]
-                        [ viewLabel [ text "Start" ]
-                        , Html.input
-                            [ type_ "datetime-local"
-                            , HA.name "start"
-                            , class "form-control"
-                            , value (subStrDate todo.startDT)
-                            , onInput OnStartChanged
-                            ]
-                            []
+                , div [ class "col-md-6 mb-3" ]
+                    [ viewLabel [ text "End" ]
+                    , Html.input
+                        [ type_ "datetime-local"
+                        , HA.name "end"
+                        , class "form-control"
+                        , value (subStrDate todo.endDT)
+                        , onInput OnEndChanged
                         ]
-                    , div [ class "col-md-6 mb-3" ]
-                        [ viewLabel [ text "End" ]
-                        , Html.input
-                            [ type_ "datetime-local"
-                            , HA.name "end"
-                            , class "form-control"
-                            , value (subStrDate todo.endDT)
-                            , onInput OnEndChanged
-                            ]
-                            []
-                        ]
-                    , div [ class "col-md-6 mb-3" ]
-                        [ Html.label [ class "form-label" ] [ text "" ]
-                        , div [ class "form-check mt-3" ]
-                            [ Html.input [ HA.id "noEnd", type_ "checkbox", class "form-check-input" ] []
-                            , Html.label [ class "form-check-label", HA.attribute "for" "noEnd" ] [ text "Open End" ]
-                            ]
+                        []
+                    ]
+                , div [ class "col-md-6 mb-3" ]
+                    [ Html.label [ class "form-label" ] [ text "" ]
+                    , div [ class "form-check mt-3" ]
+                        [ Html.input [ HA.id "noEnd", type_ "checkbox", class "form-check-input" ] []
+                        , Html.label [ class "form-check-label", HA.attribute "for" "noEnd" ] [ text "Open End" ]
                         ]
                     ]
-                , div [ class "mb-3" ]
-                    [ viewLabel [ text "Alarm" ]
-                    , Html.select [ HA.name "alarm", class "form-select" ]
-                        [ Html.option [ value "N" ] [ text "None" ]
-                        , Html.option [ value "0M" ] [ text "0 mintutes" ]
-                        , Html.option [ value "30M" ] [ text "30 mintutes" ]
-                        , Html.option [ value "1H" ] [ text "1 hour" ]
-                        , Html.option [ value "4H" ] [ text "4 hours" ]
-                        , Html.option [ value "12H" ] [ text "12 hours" ]
-                        , Html.option [ value "1D" ] [ text "1 day" ]
+                ]
+            , div [ class "mb-3" ]
+                [ viewLabel [ text "Alarm" ]
+                , Html.select [ HA.name "alarm", class "form-select" ]
+                    [ Html.option [ value "N" ] [ text "None" ]
+                    , Html.option [ value "0M" ] [ text "0 mintutes" ]
+                    , Html.option [ value "30M" ] [ text "30 mintutes" ]
+                    , Html.option [ value "1H" ] [ text "1 hour" ]
+                    , Html.option [ value "4H" ] [ text "4 hours" ]
+                    , Html.option [ value "12H" ] [ text "12 hours" ]
+                    , Html.option [ value "1D" ] [ text "1 day" ]
+                    ]
+                ]
+            , div [ class "mb-3" ]
+                [ viewLabel [ text "Repetition" ]
+                , div [ class "row g-3" ]
+                    [ div [ class "col-auto" ]
+                        [ viewFreqRadio "none-frequency" "none" "Never" (todo.frequency == Data.ToDo.None)
+                        , viewFreqRadio "second-frequency" "secondly" "Secondly" (todo.frequency == Data.ToDo.Secondly)
+                        , viewFreqRadio "minute-frequency" "minutely" "Minutely" (todo.frequency == Data.ToDo.Minutely)
+                        , viewFreqRadio "hourly-frequency" "hourly" "Hourly" (todo.frequency == Data.ToDo.Hourly)
+                        , viewFreqRadio "daily-frequency" "daily" "Daily" (todo.frequency == Data.ToDo.Daily)
+                        , viewFreqRadio "weekly-frequency" "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
+                        , viewFreqRadio "monthly-frequency" "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
+                        , viewFreqRadio "yearly-frequency" "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
                         ]
                     ]
-                , div [ class "mb-3" ]
-                    [ viewLabel [ text "Repetition" ]
-                    , div [ class "row g-3" ]
-                        [ div [ class "col-auto" ]
-                            [ viewFreqRadio "none-frequency" "none" "Never" (todo.frequency == Data.ToDo.None)
-                            , viewFreqRadio "second-frequency" "secondly" "Secondly" (todo.frequency == Data.ToDo.Secondly)
-                            , viewFreqRadio "minute-frequency" "minutely" "Minutely" (todo.frequency == Data.ToDo.Minutely)
-                            , viewFreqRadio "hourly-frequency" "hourly" "Hourly" (todo.frequency == Data.ToDo.Hourly)
-                            , viewFreqRadio "daily-frequency" "daily" "Daily" (todo.frequency == Data.ToDo.Daily)
-                            , viewFreqRadio "weekly-frequency" "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
-                            , viewFreqRadio "monthly-frequency" "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
-                            , viewFreqRadio "yearly-frequency" "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
-                            ]
-                        ]
-                    ]
-                , div [ class "mb-3" ]
-                    [ viewLabel [ text "Interval" ]
-                    , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value (todo.interval |> String.fromInt), onInput OnIntervalChange ] []
-                    ]
-                , div [ class "mb-3" ]
-                    [ viewOrdinalFreqText todo
-                    ]
-                , div [ class "mb-3" ]
-                    [ button [ type_ "submit", class "btn btn-primary", onClick OnSave ] [ text "Save" ]
+                ]
+            , div [ class "mb-3" ]
+                [ viewLabel [ text "Interval" ]
+                , Html.input [ type_ "number", HA.name "interval", class "form-control", HA.attribute "rows" "3", HA.value (todo.interval |> String.fromInt), onInput OnIntervalChange ] []
+                ]
+            , div [ class "mb-3" ]
+                [ viewOrdinalFreqText todo
+                ]
+            , div [ class "row mb-3" ]
+                [ div [ class "col-auto" ]
+                    [ button [ type_ "submit", class "btn btn-primary me-2", onClick OnSave ] [ text "Save" ]
+                    , button [ type_ "button", class "btn btn-danger", onClick OnDeleteModal ] [ text "Delete" ]
                     ]
                 ]
             ]
@@ -263,7 +310,7 @@ viewEdit todo =
 
 subStrDate : String -> String
 subStrDate dt =
-    String.left 19 dt
+    String.left 16 dt
 
 
 

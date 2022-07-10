@@ -75,8 +75,15 @@ namespace CalDo.Models
                 DtStart = item.StartDT.HasValue ? new CalDateTime(item.StartDT.Value) : null,
                 DtEnd = item.EndDT.HasValue ? new CalDateTime(item.EndDT.Value) : null,
                 Url = new Uri($"http://caldo.schatzinos.net/{item.Uid}"),
-                RecurrenceRules = new List<RecurrencePattern> { new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval) },
             };
+
+            if (item.Interval > 0)
+            {
+                @event.RecurrenceRules = new List<RecurrencePattern> {
+                    new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval)
+                };
+            }
+
             if (item.Alarm is not null)
             {
                 @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm)));
