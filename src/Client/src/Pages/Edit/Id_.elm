@@ -2,8 +2,9 @@ module Pages.Edit.Id_ exposing (Model, Msg, page)
 
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
-import Extras.Html exposing (viewLabel)
+import Extras.Html exposing (block, viewLabel, viewLink)
 import Gen.Params.Edit.Id_ exposing (Params)
+import Gen.Route exposing (Route(..))
 import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
 import Html.Attributes as HA exposing (attribute, checked, class, style, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -240,35 +241,65 @@ viewEdit todo =
                 [ p [ class "card-header-title" ] [ text "Edit" ] ]
             , div
                 [ class "card-content" ]
-                [ div [ class "mb-3" ]
-                    [ viewLabel [ text "Name" ]
-                    , div [ class "control" ]
-                        [ input [ type_ "text", class "input", HA.name "name", HA.placeholder "Clean the washmaschine", class "form-control", attribute "aria-describedby" "nameHelp", onInput OnNameChange, value todo.name ] []
-                        ]
-                    , p [ class "help" ] [ text "Summary / Name of the calendar entry" ]
-                    ]
-                , div [ class "mb-3" ]
-                    [ viewLabel [ text "Description" ]
-                    , div [ class "control" ]
-                        [ textarea
-                            [ HA.name "description"
-                            , HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry"
-                            , class "textarea"
-                            , attribute "rows" "4"
-                            , attribute "aria-describedby" "descriptionHelp"
-                            , value todo.description
-                            , onInput OnDescriptionChange
-                            ]
-                            []
-                        ]
-                    , p [ class "help" ] [ text "Calendar entry content" ]
-                    ]
+                [ viewNameAndEnable todo
+                , viewDescription todo
                 , viewStartEnd todo
                 , viewAlarm todo
                 , viewRepetition todo
                 , viewInterval todo
                 , viewOrdinalFreqText todo
                 , viewButtons
+                ]
+            ]
+        ]
+
+
+viewDescription : { a | description : String } -> Html Msg
+viewDescription todo =
+    block
+        [ viewLabel [ text "Description" ]
+        , div [ class "control" ]
+            [ textarea
+                [ HA.name "description"
+                , HA.placeholder "- Clean surfaces with soap\n- Run with 90°C\n- Wipe it dry"
+                , class "textarea"
+                , attribute "rows" "4"
+                , attribute "aria-describedby" "descriptionHelp"
+                , value todo.description
+                , onInput OnDescriptionChange
+                ]
+                []
+            ]
+        , p [ class "help" ] [ text "Calendar entry content" ]
+        ]
+
+
+viewNameAndEnable : ToDo -> Html Msg
+viewNameAndEnable todo =
+    div [ class "columns" ]
+        [ div [ class "column is-two-thirds" ]
+            [ viewLabel [ text "Name" ]
+            , div [ class "control" ]
+                [ input [ type_ "text", class "input", HA.placeholder "Clean the washmaschine", onInput OnNameChange, value todo.name ] []
+                ]
+            , p [ class "help" ] [ text "Summary / Name of the calendar entry" ]
+            ]
+        , div [ class "column" ]
+            [ viewLabel [ text "Enabled" ]
+            , div [ class "control" ]
+                [ label [ class "checkbox" ]
+                    [ input
+                        [ type_ "checkbox"
+                        , value
+                            (if todo.enabled then
+                                "true"
+
+                             else
+                                "false"
+                            )
+                        ]
+                        []
+                    ]
                 ]
             ]
         ]
@@ -282,11 +313,6 @@ viewInterval todo =
             , input [ type_ "number", class "input", HA.name "interval", HA.value (todo.interval |> String.fromInt), onInput OnIntervalChange ] []
             ]
         ]
-
-
-block : List (Html msg) -> Html msg
-block =
-    div [ class "block" ]
 
 
 viewRepetition : ToDo -> Html Msg
@@ -367,10 +393,10 @@ viewStartEnd todo =
 viewButtons : Html Msg
 viewButtons =
     div [ class "block" ]
-        [ div [ class "control" ]
+        [ div [ class "buttons" ]
             [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
             , button [ type_ "button", class "button is-danger", onClick (OnDeleteModal True) ] [ text "Delete" ]
-            , button [ type_ "button", class "button is-light" ] [ text "Cancel" ]
+            , viewLink [ type_ "button", class "button is-light" ] "Cancel" Gen.Route.Home_
             ]
         ]
 
@@ -444,5 +470,5 @@ viewFreqRadio val lbl checked =
     in
     label [ class "radio" ]
         [ input (defaultAttrib ++ checkedAttrib) []
-        , text lbl
+        , text (" " ++ lbl ++ "  ")
         ]

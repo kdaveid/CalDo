@@ -1,7 +1,7 @@
-module Extras.Html exposing (viewLabel, viewLink)
+module Extras.Html exposing (block, viewLabel, viewLink)
 
 import Gen.Route as Route exposing (Route)
-import Html exposing (Html)
+import Html exposing (Attribute, Html)
 import Html.Attributes exposing (class, href)
 
 
@@ -10,6 +10,15 @@ viewLabel =
     Html.label [ class "label" ]
 
 
-viewLink : String -> Route -> Html msg
-viewLink label route =
-    Html.a [ href (Route.toHref route) ] [ Html.text label ]
+viewLink : List (Attribute msg) -> String -> Route -> Html msg
+viewLink attribs label route =
+    let
+        att =
+            href (Route.toHref route) :: attribs
+    in
+    Html.a att [ Html.text label ]
+
+
+block : List (Html msg) -> Html msg
+block =
+    Html.div [ class "block" ]

@@ -2,7 +2,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (viewLink)
+import Extras.Html exposing (block, viewLink)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
 import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
@@ -141,10 +141,10 @@ viewToDoList mbTodos =
                         [ table [ class "table" ]
                             [ thead []
                                 [ tr []
-                                    [ th [ HA.scope "col" ] [ text "Name" ]
-                                    , th [ HA.scope "col" ] [ text "Frequency" ]
-                                    , th [ HA.scope "col" ] [ text "Interval" ]
-                                    , th [ HA.scope "col" ] [ text "Enabled" ]
+                                    [ th [] [ text "Name" ]
+                                    , th [] [ text "Frequency" ]
+                                    , th [] [ text "Interval" ]
+                                    , th [] [ text "Enabled" ]
                                     ]
                                 ]
                             , List.map (\s -> viewToDoTblRow s) todos |> tbody []
@@ -162,21 +162,24 @@ viewToDoList mbTodos =
 
 viewAddLink : Html msg
 viewAddLink =
-    viewLink "Add one" (Route.Edit__Id_ { id = "new" })
+    viewLink
+        [ class "card-footer-item" ]
+        "Add one"
+        (Route.Edit__Id_ { id = "new" })
 
 
 viewInfo : Html msg
 viewInfo =
     div [ class "notification" ]
         [ text "No ToDos found - "
-        , viewLink "create one!" (Route.Edit__Id_ { id = "new" })
+        , viewLink [] "create one!" (Route.Edit__Id_ { id = "new" })
         ]
 
 
 viewToDoTblRow : ToDo -> Html msg
 viewToDoTblRow todo =
     tr []
-        [ th [ HA.scope "row" ] [ viewLink todo.name (Route.Edit__Id_ { id = todo.uid }) ]
+        [ th [] [ viewLink [] todo.name (Route.Edit__Id_ { id = todo.uid }) ]
         , td [] [ text (freqToStr todo.frequency) ]
         , td [] [ text (String.fromInt todo.interval) ]
         , td [] [ viewEnabled todo.enabled ]
