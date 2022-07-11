@@ -2,14 +2,13 @@ module Pages.Edit.Id_ exposing (Model, Msg, page)
 
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
-import Extras.Html exposing (block, viewLabel, viewLink, viewLinkWithDetails)
+import Extras.Html exposing (block, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
-import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, style, type_, value)
+import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Infra exposing (Session)
-import Json.Decode as Decode exposing (bool)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
@@ -176,8 +175,7 @@ viewToDoOrError model =
         RemoteData.Success todo ->
             div [ class "container is-max-widescreen" ]
                 [ viewEdit todo
-
-                --, renderModal model
+                , renderModal model
                 ]
 
         RemoteData.Failure httpError ->
@@ -229,24 +227,33 @@ viewDeleteModal model =
 
 renderModal : Model -> Html Msg
 renderModal model =
-    div [ class "modal is-active", attribute "aria-label" "Modal title" ]
-        [ div [ class "modal-background", onClick (OnDeleteModal False) ]
-            []
-        , div [ class "modal-card" ]
-            [ header [ class "modal-card-head" ]
-                [ p [ class "modal-card-title" ]
-                    [ text "Modal title" ]
-                , button [ class "delete", onClick OnDelete, attribute "aria-label" "close" ]
-                    []
-                ]
-            , section [ class "modal-card-body" ]
-                [ text "Modal contents" ]
-            , footer [ class "modal-card-foot" ]
-                [ button [ type_ "button", class "btn is-secondary is-active", onClick (OnDeleteModal False) ] [ text "Cancel" ]
-                , button [ type_ "button", class "btn is-danger", onClick OnDelete ] [ text "Delete" ]
-                ]
-            ]
-        ]
+    case model.todo of
+        RemoteData.Success todo ->
+            if model.viewDeleteModal then
+                div [ class "modal is-active", attribute "aria-label" "Modal title" ]
+                    [ div [ class "modal-background", onClick (OnDeleteModal False) ]
+                        []
+                    , div [ class "modal-card" ]
+                        [ header [ class "modal-card-head" ]
+                            [ p [ class "modal-card-title" ]
+                                [ text ("Delete " ++ todo.name) ]
+                            , button [ class "delete", onClick OnDelete, attribute "aria-label" "close" ]
+                                []
+                            ]
+                        , section [ class "modal-card-body" ]
+                            [ text "Modal contents" ]
+                        , footer [ class "modal-card-foot" ]
+                            [ button [ type_ "button", class "btn is-secondary is-active", onClick (OnDeleteModal False) ] [ text "Cancel" ]
+                            , button [ type_ "button", class "btn is-danger", onClick OnDelete ] [ text "Delete" ]
+                            ]
+                        ]
+                    ]
+
+            else
+                div [] []
+
+        _ ->
+            div [] []
 
 
 viewEdit : ToDo -> Html Msg
@@ -264,11 +271,16 @@ viewEdit todo =
                 , viewRepetition todo
                 , viewInterval todo
                 , viewRepetitionUntil todo
-                , viewOrdinalFreqText todo
+                , viewAlert (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency)
                 , viewButtons
                 ]
             ]
         ]
+
+
+viewAlert : String -> Html msg
+viewAlert str =
+    div [ class "notification is-info is-light" ] [ text str ]
 
 
 viewDescription : { a | description : String } -> Html Msg
@@ -351,37 +363,29 @@ viewRepetitionUntil todo =
         [ viewLabel [ text "Until" ]
         , div [ class "control" ]
             [ div [ class "columns" ]
-                [ div [ class "column is-two-thirds" ]
-                    [ div [ class "notification is-info is-light" ]
-                        [ div [ class "columns" ]
-                            [ div [ class "column is-one-third" ]
-                                [ div
-                                    [ class "field" ]
-                                    [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forDate", checked (not todo.repetitionUntilForEver), onCheck OnRepetitionUntilDate ] []
-                                    , label [ HA.for "forDate" ] [ text " Date" ]
-                                    ]
-                                ]
-                            , div [ class "column" ]
-                                [ input
-                                    [ type_ "date"
-                                    , class "input"
-                                    , HA.name "untilDate"
-                                    , value (String.left 10 todo.repetitionUntil)
-                                    , disabled todo.repetitionUntilForEver
-                                    , onInput OnRepetitionUntilDateChanged
-                                    ]
-                                    []
-                                ]
-                            ]
+                [ div [ class "column" ]
+                    [ div [ class "field" ]
+                        [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forEverCheckbox", checked todo.repetitionUntilForEver, onCheck OnRepetitionForEver ] []
+                        , label [ HA.for "forEverCheckbox" ] [ text " For ever" ]
                         ]
                     ]
                 , div [ class "column" ]
-                    [ div [ class "notification is-info is-light" ]
-                        [ div [ class "field" ]
-                            [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forEverCheckbox", checked todo.repetitionUntilForEver, onCheck OnRepetitionForEver ] []
-                            , label [ HA.for "forEverCheckbox" ] [ text " For ever" ]
-                            ]
+                    [ div
+                        [ class "field" ]
+                        [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forDate", checked (not todo.repetitionUntilForEver), onCheck OnRepetitionUntilDate ] []
+                        , label [ HA.for "forDate" ] [ text " Date" ]
                         ]
+                    ]
+                , div [ class "column is-half" ]
+                    [ input
+                        [ type_ "date"
+                        , class "input"
+                        , HA.name "untilDate"
+                        , value (String.left 10 todo.repetitionUntil)
+                        , disabled todo.repetitionUntilForEver
+                        , onInput OnRepetitionUntilDateChanged
+                        ]
+                        []
                     ]
                 ]
             ]
@@ -461,63 +465,6 @@ viewButtons =
 subStrDate : String -> String
 subStrDate dt =
     String.left 16 dt
-
-
-viewOrdinalFreqText : ToDo -> Html msg
-viewOrdinalFreqText todo =
-    let
-        extra =
-            if todo.repetitionUntil == "" then
-                " until forever"
-
-            else
-                " until " ++ todo.repetitionUntil
-    in
-    if todo.interval <= 0 then
-        viewLabel [ text "Runs just once " ]
-
-    else
-        case todo.frequency of
-            None ->
-                viewAlert "Runs just once"
-
-            Secondly ->
-                viewFreqLabel todo.interval "second" extra
-
-            Minutely ->
-                viewFreqLabel todo.interval "minute" extra
-
-            Hourly ->
-                viewFreqLabel todo.interval "hour" extra
-
-            Daily ->
-                viewFreqLabel todo.interval "day" extra
-
-            Weekly ->
-                viewFreqLabel todo.interval "week" extra
-
-            Monthly ->
-                viewFreqLabel todo.interval "month" extra
-
-            Yearly ->
-                viewFreqLabel todo.interval "year" extra
-
-            Unknown ->
-                viewAlert "Unknown - an error!"
-
-
-viewAlert : String -> Html msg
-viewAlert str =
-    div [ class "notification is-info is-light" ] [ text str ]
-
-
-viewFreqLabel : Int -> String -> String -> Html msg
-viewFreqLabel int freq extra =
-    if int == 1 then
-        viewAlert ("Runs every " ++ freq ++ extra)
-
-    else
-        viewAlert ("Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s" ++ extra)
 
 
 viewFreqRadio : String -> String -> Bool -> Html Msg

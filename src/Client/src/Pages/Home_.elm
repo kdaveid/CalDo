@@ -2,7 +2,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (viewLink)
+import Extras.Html exposing (viewLink, viewOrdinalFreqText)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
 import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
@@ -142,8 +142,11 @@ viewToDoList mbTodos =
                             [ thead []
                                 [ tr []
                                     [ th [] [ text "Name" ]
-                                    , th [] [ text "Frequency" ]
-                                    , th [] [ text "Interval" ]
+
+                                    -- , th [] [ text "Frequency" ]
+                                    -- , th [] [ text "Interval" ]
+                                    , th [] [ text "Start" ]
+                                    , th [] [ text "Until" ]
                                     , th [] [ text "Enabled" ]
                                     ]
                                 ]
@@ -180,7 +183,19 @@ viewToDoTblRow : ToDo -> Html msg
 viewToDoTblRow todo =
     tr []
         [ th [] [ viewLink [] todo.name (Route.Edit__Id_ { id = todo.uid }) ]
-        , td [] [ text (freqToStr todo.frequency) ]
-        , td [] [ text (String.fromInt todo.interval) ]
+
+        -- , td [] [ text (freqToStr todo.frequency) ]
+        -- , td [] [ text (String.fromInt todo.interval) ]
+        , td [] [ text todo.startDT ]
+        , td [] [ text (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency) ]
         , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
         ]
+
+
+viewRepOrDate : { a | repetitionUntilForEver : Bool, repetitionUntil : String } -> String
+viewRepOrDate todo =
+    if todo.repetitionUntilForEver then
+        "forever"
+
+    else
+        "until " ++ String.left 10 todo.repetitionUntil
