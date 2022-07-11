@@ -2,11 +2,11 @@ module Pages.Edit.Id_ exposing (Model, Msg, page)
 
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
-import Extras.Html exposing (block, viewLabel, viewLink)
+import Extras.Html exposing (block, viewLabel, viewLink, viewLinkWithDetails)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
-import Html.Attributes as HA exposing (attribute, checked, class, style, type_, value)
+import Html.Attributes as HA exposing (attribute, checked, class, id, name, style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Infra exposing (Session)
 import Json.Decode as Decode exposing (bool)
@@ -158,7 +158,7 @@ viewToDoOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success todo ->
-            div []
+            div [ class "container is-max-widescreen" ]
                 [ viewEdit todo
 
                 --, renderModal model
@@ -247,6 +247,7 @@ viewEdit todo =
                 , viewAlarm todo
                 , viewRepetition todo
                 , viewInterval todo
+                , viewRepetitionUntil todo
                 , viewOrdinalFreqText todo
                 , viewButtons
                 ]
@@ -285,23 +286,30 @@ viewNameAndEnable todo =
             , p [ class "help" ] [ text "Summary / Name of the calendar entry" ]
             ]
         , div [ class "column" ]
-            [ viewLabel [ text "Enabled" ]
-            , div [ class "control" ]
-                [ label [ class "checkbox" ]
-                    [ input
-                        [ type_ "checkbox"
-                        , value
-                            (if todo.enabled then
-                                "true"
-
-                             else
-                                "false"
-                            )
-                        ]
-                        []
-                    ]
+            [ viewLabel [ text "Enable" ]
+            , div [ class "field" ]
+                [ input [ class "is-checkradio", id "enabled", type_ "checkbox", name "enabledCheckbox", attribute "checked" "checked" ] []
+                , label [ attribute "for" "enabledCheckbox" ] [ text "Enabled" ]
                 ]
             ]
+
+        -- , div [ class "column" ]
+        --     [ viewLabel [ text "Enabled" ]
+        --     , div [ class "control" ]
+        --         [ label [ class "checkbox" ]
+        --             [ input
+        --                 [ type_ "checkbox"
+        --                 , value
+        --                     (if todo.enabled then
+        --                         "true"
+        --                      else
+        --                         "false"
+        --                     )
+        --                 ]
+        --                 []
+        --             ]
+        --         ]
+        --     ]
         ]
 
 
@@ -328,6 +336,17 @@ viewRepetition todo =
             , viewFreqRadio "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
             , viewFreqRadio "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
             , viewFreqRadio "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
+            ]
+        ]
+
+
+viewRepetitionUntil : ToDo -> Html Msg
+viewRepetitionUntil todo =
+    block
+        [ viewLabel [ text "Until" ]
+        , div [ class "columns" ]
+            [ div [ class "column" ] [ input [ type_ "date", class "input", HA.name "untilDate" ] [] ]
+            , div [ class "column" ] [ text "for ever" ]
             ]
         ]
 
@@ -380,24 +399,25 @@ viewStartEnd todo =
                         []
                     ]
                 ]
-            , div [ class "column" ]
-                [ viewLabel [ text "Open End" ]
-                , div [ class "control" ]
-                    [ input [ type_ "checkbox", class "checkbox" ] []
-                    ]
-                ]
             ]
         ]
 
 
 viewButtons : Html Msg
 viewButtons =
-    div [ class "block" ]
-        [ div [ class "buttons" ]
-            [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
-            , button [ type_ "button", class "button is-danger", onClick (OnDeleteModal True) ] [ text "Delete" ]
-            , viewLink [ type_ "button", class "button is-light" ] "Cancel" Gen.Route.Home_
+    div [ class "columns" ]
+        [ div [ class "column" ]
+            [ div [ class "buttons" ]
+                [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+                , viewLinkWithDetails [ type_ "button", class "button is-light" ]
+                    [ --Html.span [ class "icon is-small" ] [ Html.i [ class "fas fa-times" ] [] ]
+                      --,
+                      Html.span [] [ text "Cancel" ]
+                    ]
+                    Gen.Route.Home_
+                ]
             ]
+        , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
         ]
 
 
