@@ -69,6 +69,7 @@ type Msg
     | OnStartChanged String
     | OnEndChanged String
     | OnEnabledChanged Bool
+    | OnRepetitionUntilDateChanged String
     | OnRepetitionForEver Bool
     | OnRepetitionUntilDate Bool
     | OnSave
@@ -110,8 +111,11 @@ update mbSession pageKey msg model =
         OnEndChanged val ->
             ( { model | todo = updateToDo (\d -> { d | endDT = val }) model.todo }, Cmd.none )
 
+        OnRepetitionUntilDateChanged val ->
+            ( { model | todo = updateToDo (\d -> { d | repetitionUntil = val }) model.todo }, Cmd.none )
+
         OnRepetitionForEver _ ->
-            ( { model | todo = updateToDo (\d -> { d | repetitionUntilForEver = True }) model.todo }, Cmd.none )
+            ( { model | todo = updateToDo (\d -> { d | repetitionUntilForEver = True, repetitionUntil = "" }) model.todo }, Cmd.none )
 
         OnRepetitionUntilDate _ ->
             ( { model | todo = updateToDo (\d -> { d | repetitionUntilForEver = False }) model.todo }, Cmd.none )
@@ -353,11 +357,21 @@ viewRepetitionUntil todo =
                             [ div [ class "column is-one-third" ]
                                 [ div
                                     [ class "field" ]
-                                    [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forDate", onCheck OnRepetitionUntilDate ] []
+                                    [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forDate", checked (not todo.repetitionUntilForEver), onCheck OnRepetitionUntilDate ] []
                                     , label [ HA.for "forDate" ] [ text " Date" ]
                                     ]
                                 ]
-                            , div [ class "column" ] [ input [ type_ "date", class "input", HA.name "untilDate", disabled todo.repetitionUntilForEver ] [] ]
+                            , div [ class "column" ]
+                                [ input
+                                    [ type_ "date"
+                                    , class "input"
+                                    , HA.name "untilDate"
+                                    , value (String.left 10 todo.repetitionUntil)
+                                    , disabled todo.repetitionUntilForEver
+                                    , onInput OnRepetitionUntilDateChanged
+                                    ]
+                                    []
+                                ]
                             ]
                         ]
                     ]
@@ -451,8 +465,16 @@ subStrDate dt =
 
 viewOrdinalFreqText : ToDo -> Html msg
 viewOrdinalFreqText todo =
+    let
+        extra =
+            if todo.repetitionUntil == "" then
+                " until forever"
+
+            else
+                " until " ++ todo.repetitionUntil
+    in
     if todo.interval <= 0 then
-        viewLabel [ text "Runs just once" ]
+        viewLabel [ text "Runs just once " ]
 
     else
         case todo.frequency of
@@ -460,25 +482,25 @@ viewOrdinalFreqText todo =
                 viewAlert "Runs just once"
 
             Secondly ->
-                viewFreqLabel todo.interval "second"
+                viewFreqLabel todo.interval "second" extra
 
             Minutely ->
-                viewFreqLabel todo.interval "minute"
+                viewFreqLabel todo.interval "minute" extra
 
             Hourly ->
-                viewFreqLabel todo.interval "hour"
+                viewFreqLabel todo.interval "hour" extra
 
             Daily ->
-                viewFreqLabel todo.interval "day"
+                viewFreqLabel todo.interval "day" extra
 
             Weekly ->
-                viewFreqLabel todo.interval "week"
+                viewFreqLabel todo.interval "week" extra
 
             Monthly ->
-                viewFreqLabel todo.interval "month"
+                viewFreqLabel todo.interval "month" extra
 
             Yearly ->
-                viewFreqLabel todo.interval "year"
+                viewFreqLabel todo.interval "year" extra
 
             Unknown ->
                 viewAlert "Unknown - an error!"
@@ -489,13 +511,13 @@ viewAlert str =
     div [ class "notification is-info is-light" ] [ text str ]
 
 
-viewFreqLabel : Int -> String -> Html msg
-viewFreqLabel int freq =
+viewFreqLabel : Int -> String -> String -> Html msg
+viewFreqLabel int freq extra =
     if int == 1 then
-        viewAlert ("Runs every " ++ freq)
+        viewAlert ("Runs every " ++ freq ++ extra)
 
     else
-        viewAlert ("Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s")
+        viewAlert ("Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s" ++ extra)
 
 
 viewFreqRadio : String -> String -> Bool -> Html Msg

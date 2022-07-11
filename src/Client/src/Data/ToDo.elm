@@ -33,6 +33,7 @@ type alias ToDo =
     , startDT : String
     , endDT : String
     , frequency : Frequency
+    , repetitionUntil : String
     , repetitionUntilForEver : Bool
     , enabled : Bool
     , interval : Int
@@ -47,6 +48,7 @@ emptyToDo =
     , startDT = ""
     , endDT = ""
     , frequency = Monthly
+    , repetitionUntil = ""
     , repetitionUntilForEver = True
     , enabled = False
     , interval = 1
@@ -62,6 +64,7 @@ toDoDecoder =
         |> JD.required "startDT" JD.string
         |> JD.required "endDT" JD.string
         |> JD.required "frequency" (JD.string |> JD.andThen frequencyDecoder)
+        |> JD.optional "repetitionUntil" JD.string ""
         |> JD.optional "repetitionUntilForEver" JD.bool True
         |> JD.required "enabled" JD.bool
         |> JD.required "interval" JD.int
@@ -75,6 +78,14 @@ toDoEncoder todo =
         , ( "description", JE.string todo.description )
         , ( "startDT", JE.string todo.startDT )
         , ( "endDT", JE.string todo.endDT )
+        , ( "repetitionUntil"
+          , if todo.repetitionUntil == "" then
+                JE.null
+
+            else
+                JE.string todo.repetitionUntil
+          )
+        , ( "repetitionUntilForEver", JE.bool todo.repetitionUntilForEver )
         , ( "frequency", JE.string (freqToStr todo.frequency) )
         , ( "enabled", JE.bool todo.enabled )
         , ( "interval", JE.int todo.interval )

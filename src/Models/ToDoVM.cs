@@ -14,6 +14,10 @@ namespace CalDo.Models
 
         public DateTime? EndDT { get; set; }
 
+        public DateTime? RepetitionUntil { get; set; }
+
+        public bool RepetitionUntilForEver { get; set; }
+
         public string? Frequency { get; set; }
 
         public bool Enabled { get; set; }
@@ -28,13 +32,14 @@ namespace CalDo.Models
 
             var freq = FrequencyType.None;
             var ival = 0;
+            DateTime? until = null;
 
             if (rule != null)
             {
                 freq = rule.Frequency;
                 ival = rule.Interval;
+                until = rule.Until;
             }
-
 
             var defaultAlarm = new Alarm
             {
@@ -50,18 +55,19 @@ namespace CalDo.Models
                 serializedAlarm = new TriggerSerializer().SerializeToString(evt.Alarms.First());
             }
 
-
             return new ToDoVM
             {
                 Uid = evt.Uid,
                 Name = evt.Summary,
                 Description = evt.Description,
-                StartDT = evt.DtStart.HasDate ? evt.DtStart.Date : null,
-                EndDT = evt.DtEnd.HasDate ? evt.DtEnd.Date : null,
+                StartDT = evt.DtStart.HasDate ? evt.DtStart.Value : null,
+                EndDT = evt.DtEnd.HasDate ? evt.DtEnd.Value : null,
                 Frequency = freq.ToString(),
                 Interval = ival,
                 Alarm = serializedAlarm, // evt.Alarms.Any() ? evt.Alarms.First().
                 Enabled = enabled,
+                RepetitionUntil = until > DateTime.MinValue ? until : null,
+                RepetitionUntilForEver= until <= DateTime.MinValue,
             };
         }
 
@@ -78,11 +84,16 @@ namespace CalDo.Models
                 Url = new Uri($"http://caldo.schatzinos.net/{item.Uid}"),
             };
 
-            if (item.Interval > 0)
+            if (item.Interval > 0) // more than once
             {
-                @event.RecurrenceRules = new List<RecurrencePattern> {
-                    new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval)
-                };
+                var rrule = new RecurrencePattern(FrequencyConversions.FromString(item.Frequency ?? "None"), item.Interval);
+
+                if (item.RepetitionUntil != null)
+                {
+                    rrule.Until = item.RepetitionUntil.Value;
+                }
+
+                @event.RecurrenceRules = new List<RecurrencePattern> { rrule };
             }
 
             if (item.Alarm is not null)
