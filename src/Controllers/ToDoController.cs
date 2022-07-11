@@ -33,7 +33,7 @@ public class ToDoController : ControllerBase
     [HttpGet(Name = "GetAll")]
     public IEnumerable<ToDoVM> Get()
     {
-        return _service.GetAll().Select(s => ToDoVM.From(s));
+        return _service.GetAll();
     }
 
     [HttpGet("{id}")]
@@ -44,13 +44,13 @@ public class ToDoController : ControllerBase
         var item = _service.GetEnabled(id);
         if (item != null)
         {
-            return Ok(ToDoVM.From(item));
+            return Ok(ToDoVM.From(item, true));
         }
 
         item = _service.GetDisabled(id);
         if (item != null)
         {
-            return Ok(ToDoVM.From(item));
+            return Ok(ToDoVM.From(item, false));
         }
 
         return NotFound();

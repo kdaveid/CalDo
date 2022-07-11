@@ -1,14 +1,29 @@
-﻿using Ical.Net.Serialization;
+﻿using CalDo.Models;
+using Ical.Net.Serialization;
 using static CalDo.Constants;
 
 namespace CalDo.Functions
 {
     public class CalendarEventService
     {
-        public IEnumerable<CalendarEvent> GetAll()
+        public IEnumerable<ToDoVM> GetAll()
+        {
+            var files = GetEnabled()
+                .Cast<CalendarEvent>()
+                .Select(s => ToDoVM.From(s, true))
+                .ToList();
+
+            files.AddRange(GetDisabled()
+                .Cast<CalendarEvent>()
+                .Select(s => ToDoVM.From(s, false))
+                .ToList());
+
+            return files;
+        }
+
+        public IEnumerable<CalendarEvent> GetEnabled()
         {
             var files = Directory.GetFiles(ToDoPath, "*.ics").ToList();
-            files.AddRange(Directory.GetFiles(ToDoDisabledPath, "*.ics"));
 
             return files
                 .Select(s => ReadFile(s))
@@ -17,9 +32,9 @@ namespace CalDo.Functions
                 .ToList();
         }
 
-        public IEnumerable<CalendarEvent> GetEnabled()
+        public IEnumerable<CalendarEvent> GetDisabled()
         {
-            var files = Directory.GetFiles(ToDoPath, "*.ics").ToList();
+            var files = Directory.GetFiles(ToDoDisabledPath, "*.ics").ToList();
 
             return files
                 .Select(s => ReadFile(s))

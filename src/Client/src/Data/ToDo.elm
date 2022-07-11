@@ -32,9 +32,8 @@ type alias ToDo =
     , description : String
     , startDT : String
     , endDT : String
-    , startEdit : DateEditModel
-    , endEdit : DateEditModel
     , frequency : Frequency
+    , repetitionUntilForEver : Bool
     , enabled : Bool
     , interval : Int
     }
@@ -47,9 +46,8 @@ emptyToDo =
     , description = ""
     , startDT = ""
     , endDT = ""
-    , startEdit = { pickerModel = DatePicker.init, date = Nothing, dateText = "" }
-    , endEdit = { pickerModel = DatePicker.init, date = Nothing, dateText = "" }
     , frequency = Monthly
+    , repetitionUntilForEver = True
     , enabled = False
     , interval = 1
     }
@@ -63,9 +61,8 @@ toDoDecoder =
         |> JD.optional "description" JD.string ""
         |> JD.required "startDT" JD.string
         |> JD.required "endDT" JD.string
-        |> JD.hardcoded { pickerModel = DatePicker.init, date = Nothing, dateText = "" }
-        |> JD.hardcoded { pickerModel = DatePicker.init, date = Nothing, dateText = "" }
         |> JD.required "frequency" (JD.string |> JD.andThen frequencyDecoder)
+        |> JD.optional "repetitionUntilForEver" JD.bool True
         |> JD.required "enabled" JD.bool
         |> JD.required "interval" JD.int
 

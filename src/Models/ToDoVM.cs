@@ -22,7 +22,7 @@ namespace CalDo.Models
 
         public string? Alarm { get; set; }
 
-        public static ToDoVM From(CalendarEvent evt)
+        public static ToDoVM From(CalendarEvent evt, bool enabled)
         {
             var rule = evt.RecurrenceRules.FirstOrDefault();
 
@@ -60,7 +60,8 @@ namespace CalDo.Models
                 EndDT = evt.DtEnd.HasDate ? evt.DtEnd.Date : null,
                 Frequency = freq.ToString(),
                 Interval = ival,
-                Alarm = serializedAlarm// evt.Alarms.Any() ? evt.Alarms.First().
+                Alarm = serializedAlarm, // evt.Alarms.Any() ? evt.Alarms.First().
+                Enabled = enabled,
             };
         }
 

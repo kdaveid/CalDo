@@ -6,8 +6,8 @@ import Extras.Html exposing (block, viewLabel, viewLink, viewLinkWithDetails)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
-import Html.Attributes as HA exposing (attribute, checked, class, id, name, style, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, style, type_, value)
+import Html.Events exposing (onCheck, onClick, onInput)
 import Infra exposing (Session)
 import Json.Decode as Decode exposing (bool)
 import Page
@@ -68,6 +68,9 @@ type Msg
     | OnFrequencyChange String
     | OnStartChanged String
     | OnEndChanged String
+    | OnEnabledChanged Bool
+    | OnRepetitionForEver Bool
+    | OnRepetitionUntilDate Bool
     | OnSave
     | OnSaveComplete (WebData ToDo)
     | OnDeleteModal Bool
@@ -98,11 +101,20 @@ update mbSession pageKey msg model =
         OnFrequencyChange val ->
             ( { model | todo = updateToDo (\d -> { d | frequency = val |> freqFromStr }) model.todo }, Cmd.none )
 
+        OnEnabledChanged val ->
+            ( { model | todo = updateToDo (\d -> { d | enabled = val }) model.todo }, Cmd.none )
+
         OnStartChanged val ->
             ( { model | todo = updateToDo (\d -> { d | startDT = val }) model.todo }, Cmd.none )
 
         OnEndChanged val ->
             ( { model | todo = updateToDo (\d -> { d | endDT = val }) model.todo }, Cmd.none )
+
+        OnRepetitionForEver _ ->
+            ( { model | todo = updateToDo (\d -> { d | repetitionUntilForEver = True }) model.todo }, Cmd.none )
+
+        OnRepetitionUntilDate _ ->
+            ( { model | todo = updateToDo (\d -> { d | repetitionUntilForEver = False }) model.todo }, Cmd.none )
 
         OnSave ->
             ( model, model.todo |> RemoteData.map (save mbSession) |> RemoteData.withDefault Cmd.none )
@@ -288,28 +300,17 @@ viewNameAndEnable todo =
         , div [ class "column" ]
             [ viewLabel [ text "Enable" ]
             , div [ class "field" ]
-                [ input [ class "is-checkradio", id "enabled", type_ "checkbox", name "enabledCheckbox", attribute "checked" "checked" ] []
-                , label [ attribute "for" "enabledCheckbox" ] [ text "Enabled" ]
+                [ input
+                    [ class "is-checkradio"
+                    , id "enabled"
+                    , type_ "checkbox"
+                    , name "enabledCheckbox"
+                    , checked todo.enabled
+                    ]
+                    []
+                , label [ attribute "for" "enabledCheckbox", onClick (OnEnabledChanged (not todo.enabled)) ] [ text "Enabled" ]
                 ]
             ]
-
-        -- , div [ class "column" ]
-        --     [ viewLabel [ text "Enabled" ]
-        --     , div [ class "control" ]
-        --         [ label [ class "checkbox" ]
-        --             [ input
-        --                 [ type_ "checkbox"
-        --                 , value
-        --                     (if todo.enabled then
-        --                         "true"
-        --                      else
-        --                         "false"
-        --                     )
-        --                 ]
-        --                 []
-        --             ]
-        --         ]
-        --     ]
         ]
 
 
@@ -344,9 +345,31 @@ viewRepetitionUntil : ToDo -> Html Msg
 viewRepetitionUntil todo =
     block
         [ viewLabel [ text "Until" ]
-        , div [ class "columns" ]
-            [ div [ class "column" ] [ input [ type_ "date", class "input", HA.name "untilDate" ] [] ]
-            , div [ class "column" ] [ text "for ever" ]
+        , div [ class "control" ]
+            [ div [ class "columns" ]
+                [ div [ class "column is-two-thirds" ]
+                    [ div [ class "notification is-info is-light" ]
+                        [ div [ class "columns" ]
+                            [ div [ class "column is-one-third" ]
+                                [ div
+                                    [ class "field" ]
+                                    [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forDate", onCheck OnRepetitionUntilDate ] []
+                                    , label [ HA.for "forDate" ] [ text " Date" ]
+                                    ]
+                                ]
+                            , div [ class "column" ] [ input [ type_ "date", class "input", HA.name "untilDate", disabled todo.repetitionUntilForEver ] [] ]
+                            ]
+                        ]
+                    ]
+                , div [ class "column" ]
+                    [ div [ class "notification is-info is-light" ]
+                        [ div [ class "field" ]
+                            [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forEverCheckbox", checked todo.repetitionUntilForEver, onCheck OnRepetitionForEver ] []
+                            , label [ HA.for "forEverCheckbox" ] [ text " For ever" ]
+                            ]
+                        ]
+                    ]
+                ]
             ]
         ]
 

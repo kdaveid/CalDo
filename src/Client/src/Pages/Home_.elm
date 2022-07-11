@@ -2,11 +2,11 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (block, viewLink)
+import Extras.Html exposing (viewLink)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
 import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
-import Html.Attributes as HA exposing (checked, class, type_, value)
+import Html.Attributes as HA exposing (checked, class, type_)
 import Http
 import Infra exposing (..)
 import Page
@@ -182,10 +182,5 @@ viewToDoTblRow todo =
         [ th [] [ viewLink [] todo.name (Route.Edit__Id_ { id = todo.uid }) ]
         , td [] [ text (freqToStr todo.frequency) ]
         , td [] [ text (String.fromInt todo.interval) ]
-        , td [] [ viewEnabled todo.enabled ]
+        , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
         ]
-
-
-viewEnabled : Bool -> Html msg
-viewEnabled value =
-    div [ class "form-check" ] [ Html.input [ type_ "checkbox", checked value, HA.disabled True ] [] ]
