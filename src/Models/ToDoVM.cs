@@ -24,7 +24,7 @@ namespace CalDo.Models
 
         public int Interval { get; set; }
 
-        public string? Alarm { get; set; }
+        public AlarmVM? Alarm { get; set; }
 
         public static ToDoVM From(CalendarEvent evt, bool enabled)
         {
@@ -41,20 +41,11 @@ namespace CalDo.Models
                 until = rule.Until;
             }
 
-            var defaultAlarm = new Alarm
-            {
-                Action = AlarmAction.Display,
-                Description = "Reminder",
-                Trigger = new Trigger(TimeSpan.Zero)
-            };
-
-            var serializedAlarm = new TriggerSerializer().SerializeToString(defaultAlarm);
-
+            AlarmVM? a = null;
             if (evt.Alarms.Any())
             {
-                serializedAlarm = new TriggerSerializer().SerializeToString(evt.Alarms.First());
+                a = AlarmVM.FromCalendarObj(evt.Alarms.First());
             }
-
             return new ToDoVM
             {
                 Uid = evt.Uid,
@@ -64,10 +55,10 @@ namespace CalDo.Models
                 EndDT = evt.DtEnd.HasDate ? evt.DtEnd.Value : null,
                 Frequency = freq.ToString(),
                 Interval = ival,
-                Alarm = serializedAlarm, // evt.Alarms.Any() ? evt.Alarms.First().
+                Alarm = a, // evt.Alarms.Any() ? evt.Alarms.First().
                 Enabled = enabled,
                 RepetitionUntil = until > DateTime.MinValue ? until : null,
-                RepetitionUntilForEver= until <= DateTime.MinValue,
+                RepetitionUntilForEver = until <= DateTime.MinValue,
             };
         }
 
@@ -96,10 +87,22 @@ namespace CalDo.Models
                 @event.RecurrenceRules = new List<RecurrencePattern> { rrule };
             }
 
-            if (item.Alarm is not null)
-            {
-                @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm)));
-            }
+            //var defaultAlarm = new Alarm
+            //{
+            //    Action = AlarmAction.Display,
+            //    Summary = "Summary",
+            //    Description = "Reminder",
+            //    Trigger = new Trigger(TimeSpan.Zero)
+            //};
+
+            //if (item.Alarm is not null)
+            //{
+            //    @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm)));
+            //}
+            //else
+            //{
+            //    @event.Alarms.Add(defaultAlarm);
+            //}
 
             return @event;
         }

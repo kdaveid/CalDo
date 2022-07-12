@@ -1,6 +1,6 @@
-module Data.ToDo exposing (DateEditModel, Frequency(..), ToDo, emptyToDo, freqFromStr, freqToStr, frequencyDecoder, toDoDecoder, toDoEncoder)
+module Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr, freqToStr, frequencyDecoder, toDoDecoder, toDoEncoder)
 
-import Date exposing (Date)
+import Data.Alarm exposing (Alarm, alarmDecoder, defaultAlarm)
 import DatePicker exposing (ChangeEvent(..))
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
@@ -19,13 +19,6 @@ type Frequency
     | Unknown
 
 
-type alias DateEditModel =
-    { pickerModel : DatePicker.Model
-    , dateText : String
-    , date : Maybe Date
-    }
-
-
 type alias ToDo =
     { uid : String
     , name : String
@@ -37,6 +30,7 @@ type alias ToDo =
     , repetitionUntilForEver : Bool
     , enabled : Bool
     , interval : Int
+    , alarm : Alarm
     }
 
 
@@ -52,6 +46,7 @@ emptyToDo =
     , repetitionUntilForEver = True
     , enabled = False
     , interval = 1
+    , alarm = defaultAlarm
     }
 
 
@@ -68,6 +63,7 @@ toDoDecoder =
         |> JD.optional "repetitionUntilForEver" JD.bool True
         |> JD.required "enabled" JD.bool
         |> JD.required "interval" JD.int
+        |> JD.required "alarm" alarmDecoder
 
 
 toDoEncoder : ToDo -> JE.Value
