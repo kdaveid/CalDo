@@ -1,9 +1,11 @@
 module Extras.Html exposing (block, viewLabel, viewLink, viewLinkWithDetails, viewOrdinalFreqText)
 
 import Data.ToDo exposing (Frequency(..))
+import Date
 import Gen.Route as Route exposing (Route)
 import Html exposing (Attribute, Html)
 import Html.Attributes exposing (class, href)
+import RemoteData exposing (RemoteData(..))
 
 
 viewLabel : List (Html msg) -> Html msg
@@ -37,12 +39,22 @@ block =
 viewOrdinalFreqText : String -> Int -> Frequency -> String
 viewOrdinalFreqText repetitionUntil interval freq =
     let
+        dateStr =
+            case Date.fromIsoString (String.left 10 repetitionUntil) of
+                Ok val ->
+                    Date.format "dd.MM.yyyy" val
+
+                Err err ->
+                    err
+
         extra =
             if repetitionUntil == "" then
                 ", forever"
 
             else
-                " until " ++ String.left 10 repetitionUntil
+                " until " ++ dateStr
+
+        --String.left 10 repetitionUntil
     in
     if interval <= 0 then
         "Runs just once "
