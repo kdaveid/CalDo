@@ -83,6 +83,10 @@ updateToDo fn todo =
     RemoteData.map fn todo
 
 
+sampleDate =
+    "2022-07-01"
+
+
 update : Maybe Session -> Key -> Msg -> Model -> ( Model, Cmd Msg )
 update mbSession pageKey msg model =
     case msg of

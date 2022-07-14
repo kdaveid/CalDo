@@ -1,4 +1,4 @@
-module Extras.Html exposing (block, viewLabel, viewLink, viewLinkWithDetails, viewOrdinalFreqText)
+module Extras.Html exposing (block, dateToString, viewLabel, viewLink, viewLinkWithDetails, viewOrdinalFreqText)
 
 import Data.ToDo exposing (Frequency(..))
 import Date
@@ -6,6 +6,7 @@ import Gen.Route as Route exposing (Route)
 import Html exposing (Attribute, Html)
 import Html.Attributes exposing (class, href)
 import RemoteData exposing (RemoteData(..))
+import Time
 
 
 viewLabel : List (Html msg) -> Html msg
@@ -36,23 +37,29 @@ block =
     Html.div [ class "block" ]
 
 
+dateToString : String -> String
+dateToString str =
+    case Date.fromIsoString (String.left 10 str) of
+        Ok val ->
+            Date.format "dd.MM.yyyy" val
+
+        Err err ->
+            err
+
+
+
+--format "MM/dd/yyyy" Time.utc (Time.millisToPosix 1575021804192)
+
+
 viewOrdinalFreqText : String -> Int -> Frequency -> String
 viewOrdinalFreqText repetitionUntil interval freq =
     let
-        dateStr =
-            case Date.fromIsoString (String.left 10 repetitionUntil) of
-                Ok val ->
-                    Date.format "dd.MM.yyyy" val
-
-                Err err ->
-                    err
-
         extra =
             if repetitionUntil == "" then
                 ", forever"
 
             else
-                " until " ++ dateStr
+                " until " ++ dateToString repetitionUntil
 
         --String.left 10 repetitionUntil
     in
