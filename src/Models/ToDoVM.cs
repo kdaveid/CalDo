@@ -95,10 +95,10 @@ namespace CalDo.Models
             //    Trigger = new Trigger(TimeSpan.Zero)
             //};
 
-            //if (item.Alarm is not null)
-            //{
-            //    @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm)));
-            //}
+            if (!(string.IsNullOrEmpty(item.Alarm?.Trigger)))
+            {
+                @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm.Trigger)));
+            }
             //else
             //{
             //    @event.Alarms.Add(defaultAlarm);

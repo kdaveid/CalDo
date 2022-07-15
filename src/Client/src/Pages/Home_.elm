@@ -110,8 +110,8 @@ view model =
     , body =
         [ div [ class "section" ]
             [ div [ class "container" ]
-                [ h1 [ class "title" ] [ text "Welcome to CalDo" ]
-                , p [ class "subtitle" ] [ text "Calendar-ToDo-List – the to do list with history in your calendar." ]
+                [ h1 [ class "title" ] [ text "CalDo" ]
+                , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
                 , viewErrorMessage model.error
                 , viewToDoList model.toDos
                 ]

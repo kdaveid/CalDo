@@ -1,4 +1,4 @@
-module Data.Alarm exposing (Alarm, Trigger(..), alarmDecoder, alarmEncoder, defaultAlarm, triggerString, triggerToUiString)
+module Data.Alarm exposing (Alarm, Trigger(..), alarmDecoder, alarmEncoder, defaultAlarm, stringToTrigger, triggerString, triggerToUiString)
 
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
@@ -15,6 +15,7 @@ type alias Alarm =
 type Trigger
     = None
     | Minutes0
+    | Minutes15
     | Minutes30
     | Hours1
     | Hours6
@@ -45,11 +46,42 @@ alarmEncoder a =
         ]
 
 
+stringToTrigger : String -> Trigger
+stringToTrigger str =
+    case str |> String.toUpper of
+        "PT0M" ->
+            Minutes0
+
+        "PT-15M" ->
+            Minutes15
+
+        "PT-30M" ->
+            Minutes30
+
+        "PT-1H" ->
+            Hours1
+
+        "PT-6H" ->
+            Hours6
+
+        "PT-12H" ->
+            Hours12
+
+        "PT-1D" ->
+            Days1
+
+        _ ->
+            Unknown
+
+
 triggerDecoder : String -> JD.Decoder Trigger
 triggerDecoder str =
     case str |> String.toLower of
         "PT0M" ->
             JD.succeed Minutes0
+
+        "PT-15M" ->
+            JD.succeed Minutes15
 
         "PT-30M" ->
             JD.succeed Minutes30
@@ -79,6 +111,9 @@ triggerString t =
         Minutes0 ->
             "PT0M"
 
+        Minutes15 ->
+            "PT-15M"
+
         Minutes30 ->
             "PT-30M"
 
@@ -105,22 +140,25 @@ triggerToUiString t =
             "None"
 
         Minutes0 ->
-            "0 mintutes"
+            "At the time"
+
+        Minutes15 ->
+            "15 mintutes before"
 
         Minutes30 ->
-            "30 mintutes"
+            "30 mintutes before"
 
         Hours1 ->
-            "1 hour"
+            "1 hour before"
 
         Hours6 ->
-            "6 hours"
+            "6 hours before"
 
         Hours12 ->
-            "12 hours"
+            "12 hours before"
 
         Days1 ->
-            "1 day"
+            "1 day before"
 
         Unknown ->
             "unknown"

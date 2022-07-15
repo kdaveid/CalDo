@@ -1,7 +1,7 @@
 module Pages.Edit.Id_ exposing (Model, Msg, page)
 
 import Browser.Navigation exposing (Key, pushUrl)
-import Data.Alarm exposing (Trigger, triggerString, triggerToUiString)
+import Data.Alarm exposing (Alarm, Trigger, stringToTrigger, triggerString, triggerToUiString)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
 import Extras.Html exposing (block, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
 import Gen.Params.Edit.Id_ exposing (Params)
@@ -69,6 +69,7 @@ type Msg
     | OnStartChanged String
     | OnEndChanged String
     | OnEnabledChanged Bool
+      -- | OnAlarmTriggerChanged ( String, Alarm )
     | OnRepetitionUntilDateChanged String
     | OnRepetitionForEver Bool
     | OnRepetitionUntilDate Bool
@@ -109,6 +110,8 @@ update mbSession pageKey msg model =
         OnEnabledChanged val ->
             ( { model | todo = updateToDo (\d -> { d | enabled = val }) model.todo }, Cmd.none )
 
+        -- OnAlarmTriggerChanged ( val, alarm ) ->
+        --     ( { model | alarm = { alarm | trigger = stringToTrigger val } }, Cmd.none )
         OnStartChanged val ->
             ( { model | todo = updateToDo (\d -> { d | startDT = val }) model.todo }, Cmd.none )
 
@@ -404,23 +407,25 @@ viewAlarm todo =
             [ viewLabel [ text "Alarm" ]
             , div [ class "select" ]
                 [ select []
-                    [ viewTriggerOption todo.alarm.trigger Data.Alarm.None
-                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Minutes0
-                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Minutes30
-                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Hours1
-                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Hours6
-                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Hours12
+                    [ viewTriggerOption todo.alarm Data.Alarm.None
+                    , viewTriggerOption todo.alarm Data.Alarm.Minutes0
+                    , viewTriggerOption todo.alarm Data.Alarm.Minutes15
+                    , viewTriggerOption todo.alarm Data.Alarm.Minutes30
+                    , viewTriggerOption todo.alarm Data.Alarm.Hours1
+                    , viewTriggerOption todo.alarm Data.Alarm.Hours6
+                    , viewTriggerOption todo.alarm Data.Alarm.Hours12
+                    , viewTriggerOption todo.alarm Data.Alarm.Days1
                     ]
                 ]
             ]
         ]
 
 
-viewTriggerOption : Trigger -> Trigger -> Html msg
-viewTriggerOption val opt =
+viewTriggerOption : Alarm -> Trigger -> Html msg
+viewTriggerOption alarm opt =
     let
         selected =
-            HA.selected (opt == val)
+            HA.selected (opt == alarm.trigger)
     in
     option [ value (opt |> triggerString), selected ] [ text (opt |> triggerToUiString) ]
 
