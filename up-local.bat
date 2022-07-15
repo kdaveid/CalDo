@@ -1,0 +1,1 @@
+docker-compose -f Deployment/docker-compose.yml -f Deployment/docker-compose.override.yml up --build -d 
