@@ -1,12 +1,13 @@
 module Pages.Edit.Id_ exposing (Model, Msg, page)
 
 import Browser.Navigation exposing (Key, pushUrl)
+import Data.Alarm exposing (Trigger, triggerString, triggerToUiString)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
 import Extras.Html exposing (block, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
-import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, type_, value)
+import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, selected, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Infra exposing (Session)
 import Page
@@ -403,17 +404,25 @@ viewAlarm todo =
             [ viewLabel [ text "Alarm" ]
             , div [ class "select" ]
                 [ select []
-                    [ option [ value "N" ] [ text "None" ]
-                    , option [ value "0M" ] [ text "0 mintutes" ]
-                    , option [ value "30M" ] [ text "30 mintutes" ]
-                    , option [ value "1H" ] [ text "1 hour" ]
-                    , option [ value "4H" ] [ text "4 hours" ]
-                    , option [ value "12H" ] [ text "12 hours" ]
-                    , option [ value "1D" ] [ text "1 day" ]
+                    [ viewTriggerOption todo.alarm.trigger Data.Alarm.None
+                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Minutes0
+                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Minutes30
+                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Hours1
+                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Hours6
+                    , viewTriggerOption todo.alarm.trigger Data.Alarm.Hours12
                     ]
                 ]
             ]
         ]
+
+
+viewTriggerOption : Trigger -> Trigger -> Html msg
+viewTriggerOption val opt =
+    let
+        selected =
+            HA.selected (opt == val)
+    in
+    option [ value (opt |> triggerString), selected ] [ text (opt |> triggerToUiString) ]
 
 
 viewStartEnd : { a | startDT : String, endDT : String } -> Html Msg

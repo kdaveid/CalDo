@@ -41,7 +41,7 @@ namespace CalDo.Models
                 until = rule.Until;
             }
 
-            AlarmVM? a = null;
+            AlarmVM? a = AlarmVM.DisabledAlarm;
             if (evt.Alarms.Any())
             {
                 a = AlarmVM.FromCalendarObj(evt.Alarms.First());

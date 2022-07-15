@@ -26,7 +26,8 @@ public class ToDoController : ControllerBase
             StartDT = DateTime.Now,
             EndDT = DateTime.Now.AddHours(1),
             Interval = 1,
-            Frequency = FrequencyType.Monthly.ToString()
+            Frequency = FrequencyType.Monthly.ToString(),
+            Alarm = AlarmVM.DisabledAlarm
         };
     }
 

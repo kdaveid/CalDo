@@ -1,4 +1,4 @@
-module Data.Alarm exposing (Alarm, alarmDecoder, alarmEncoder, defaultAlarm, triggerToString)
+module Data.Alarm exposing (Alarm, Trigger(..), alarmDecoder, alarmEncoder, defaultAlarm, triggerString, triggerToUiString)
 
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
@@ -41,7 +41,7 @@ alarmEncoder a =
     JE.object
         [ ( "summary", JE.string a.summary )
         , ( "description", JE.string a.description )
-        , ( "trigger", JE.string (triggerEncoder a.trigger) )
+        , ( "trigger", JE.string (triggerString a.trigger) )
         ]
 
 
@@ -70,8 +70,8 @@ triggerDecoder str =
             JD.succeed Unknown
 
 
-triggerEncoder : Trigger -> String
-triggerEncoder t =
+triggerString : Trigger -> String
+triggerString t =
     case t of
         None ->
             ""
@@ -98,8 +98,8 @@ triggerEncoder t =
             ""
 
 
-triggerToString : Trigger -> String
-triggerToString t =
+triggerToUiString : Trigger -> String
+triggerToUiString t =
     case t of
         None ->
             "None"

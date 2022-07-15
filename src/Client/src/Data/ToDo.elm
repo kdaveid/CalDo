@@ -1,7 +1,8 @@
 module Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr, freqToStr, frequencyDecoder, toDoDecoder, toDoEncoder)
 
-import Data.Alarm exposing (Alarm, alarmDecoder, defaultAlarm)
+import Data.Alarm exposing (Alarm, alarmDecoder, alarmEncoder, defaultAlarm)
 import DatePicker exposing (ChangeEvent(..))
+import Html.Attributes exposing (default)
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
 import Json.Encode as JE
@@ -85,6 +86,7 @@ toDoEncoder todo =
         , ( "frequency", JE.string (freqToStr todo.frequency) )
         , ( "enabled", JE.bool todo.enabled )
         , ( "interval", JE.int todo.interval )
+        , ( "alarm", alarmEncoder todo.alarm )
         ]
 
 
