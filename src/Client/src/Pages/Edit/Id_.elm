@@ -69,7 +69,7 @@ type Msg
     | OnStartChanged String
     | OnEndChanged String
     | OnEnabledChanged Bool
-      -- | OnAlarmTriggerChanged ( String, Alarm )
+    | OnAlarmTriggerChanged String
     | OnRepetitionUntilDateChanged String
     | OnRepetitionForEver Bool
     | OnRepetitionUntilDate Bool
@@ -83,6 +83,16 @@ type Msg
 updateToDo : (ToDo -> ToDo) -> WebData ToDo -> WebData ToDo
 updateToDo fn todo =
     RemoteData.map fn todo
+
+
+setTrigger : String -> Alarm -> Alarm
+setTrigger triggerStr alarm =
+    { alarm | trigger = stringToTrigger triggerStr }
+
+
+asTriggerIn : Alarm -> String -> Alarm
+asTriggerIn alarm string =
+    setTrigger string alarm
 
 
 sampleDate =
@@ -110,8 +120,13 @@ update mbSession pageKey msg model =
         OnEnabledChanged val ->
             ( { model | todo = updateToDo (\d -> { d | enabled = val }) model.todo }, Cmd.none )
 
-        -- OnAlarmTriggerChanged ( val, alarm ) ->
-        --     ( { model | alarm = { alarm | trigger = stringToTrigger val } }, Cmd.none )
+        OnAlarmTriggerChanged val ->
+            let
+                _ =
+                    Debug.log "alarm is now:" val
+            in
+            ( { model | todo = updateToDo (\d -> { d | alarm = d.alarm |> setTrigger val }) model.todo }, Cmd.none )
+
         OnStartChanged val ->
             ( { model | todo = updateToDo (\d -> { d | startDT = val }) model.todo }, Cmd.none )
 
@@ -400,13 +415,13 @@ viewRepetitionUntil todo =
         ]
 
 
-viewAlarm : ToDo -> Html msg
+viewAlarm : ToDo -> Html Msg
 viewAlarm todo =
     block
         [ div [ class "control" ]
             [ viewLabel [ text "Alarm" ]
             , div [ class "select" ]
-                [ select []
+                [ select [ onInput OnAlarmTriggerChanged ]
                     [ viewTriggerOption todo.alarm Data.Alarm.None
                     , viewTriggerOption todo.alarm Data.Alarm.Minutes0
                     , viewTriggerOption todo.alarm Data.Alarm.Minutes15
