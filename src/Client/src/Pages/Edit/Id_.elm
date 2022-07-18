@@ -439,6 +439,8 @@ viewAlarm todo =
 viewTriggerOption : Alarm -> Trigger -> Html msg
 viewTriggerOption alarm opt =
     let
+        -- _ =
+        --     Debug.log "alarm trigger = " alarm.trigger
         selected =
             HA.selected (opt == alarm.trigger)
     in

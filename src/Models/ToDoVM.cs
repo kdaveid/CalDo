@@ -1,4 +1,5 @@
 ﻿using CalDo.Functions;
+using Ical.Net.Serialization;
 
 namespace CalDo.Models
 {
@@ -87,22 +88,28 @@ namespace CalDo.Models
                 @event.RecurrenceRules = new List<RecurrencePattern> { rrule };
             }
 
-            //var defaultAlarm = new Alarm
-            //{
-            //    Action = AlarmAction.Display,
-            //    Summary = "Summary",
-            //    Description = "Reminder",
-            //    Trigger = new Trigger(TimeSpan.Zero)
-            //};
-
             if (!(string.IsNullOrEmpty(item.Alarm?.Trigger)))
             {
-                @event.Alarms.Add((Alarm)new TriggerSerializer().Deserialize(new StringReader(item.Alarm.Trigger)));
+                @event.Alarms.Add(new Alarm
+                {
+                    Action = AlarmAction.Display,
+                    Summary = item.Alarm.Summary,
+                    Description = item.Alarm.Description,
+                    Trigger = new Trigger(item.Alarm.Trigger)
+                });
             }
-            //else
+
+            //var cal = new Calendar
             //{
-            //    @event.Alarms.Add(defaultAlarm);
-            //}
+            //    Method = "PUBLISH",
+            //    Version = "2.0"
+            //};
+
+            //cal.Events.Add(@event);
+
+            //var serializer = new CalendarSerializer();
+            //var serializedCalendar = serializer.SerializeToString(cal);
+
 
             return @event;
         }

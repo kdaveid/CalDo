@@ -52,22 +52,22 @@ stringToTrigger str =
         "PT0M" ->
             Minutes0
 
-        "PT-15M" ->
+        "-PT15M" ->
             Minutes15
 
-        "PT-30M" ->
+        "-PT30M" ->
             Minutes30
 
-        "PT-1H" ->
+        "-PT1H" ->
             Hours1
 
-        "PT-6H" ->
+        "-PT6H" ->
             Hours6
 
-        "PT-12H" ->
+        "-PT12H" ->
             Hours12
 
-        "PT-1D" ->
+        "-PT1D" ->
             Days1
 
         _ ->
@@ -76,26 +76,26 @@ stringToTrigger str =
 
 triggerDecoder : String -> JD.Decoder Trigger
 triggerDecoder str =
-    case str |> String.toLower of
+    case str |> String.toUpper of
         "PT0M" ->
             JD.succeed Minutes0
 
-        "PT-15M" ->
+        "-PT15M" ->
             JD.succeed Minutes15
 
-        "PT-30M" ->
+        "-PT30M" ->
             JD.succeed Minutes30
 
-        "PT-1H" ->
+        "-PT1H" ->
             JD.succeed Hours1
 
-        "PT-6H" ->
+        "-PT6H" ->
             JD.succeed Hours6
 
-        "PT-12H" ->
+        "-PT12H" ->
             JD.succeed Hours12
 
-        "PT-1D" ->
+        "-PT1D" ->
             JD.succeed Days1
 
         _ ->
@@ -112,22 +112,22 @@ triggerString t =
             "PT0M"
 
         Minutes15 ->
-            "PT-15M"
+            "-PT15M"
 
         Minutes30 ->
-            "PT-30M"
+            "-PT30M"
 
         Hours1 ->
-            "PT-1H"
+            "-PT1H"
 
         Hours6 ->
-            "PT-6H"
+            "-PT6H"
 
         Hours12 ->
-            "PT-12H"
+            "-PT12H"
 
         Days1 ->
-            "PT-1D"
+            "-PT1D"
 
         Unknown ->
             ""
@@ -143,10 +143,10 @@ triggerToUiString t =
             "At the time"
 
         Minutes15 ->
-            "15 mintutes before"
+            "15 minutes before"
 
         Minutes30 ->
-            "30 mintutes before"
+            "30 minutes before"
 
         Hours1 ->
             "1 hour before"

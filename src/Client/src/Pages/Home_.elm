@@ -114,6 +114,7 @@ view model =
                 , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
                 , viewErrorMessage model.error
                 , viewToDoList model.toDos
+                , viewCalendar model.cal
                 ]
             ]
         ]
@@ -196,3 +197,18 @@ viewRepOrDate todo =
 
     else
         "until " ++ String.left 10 todo.repetitionUntil
+
+
+viewCalendar : Maybe String -> Html msg
+viewCalendar mbCalString =
+    case mbCalString of
+        Just calStr ->
+            div [ class "section" ]
+                [ Html.article [ class "message" ]
+                    [ div [ class "message-header" ] [ Html.p [] [ text "Calendar" ] ]
+                    , div [ class "message-body" ] [ Html.code [] [ text calStr ] ]
+                    ]
+                ]
+
+        Nothing ->
+            div [] []
