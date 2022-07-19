@@ -1,10 +1,10 @@
-module Extras.Html exposing (block, dateToString, viewLabel, viewLink, viewLinkWithDetails, viewOrdinalFreqText)
+module Extras.Html exposing (block, dateToString, ionicon, viewLabel, viewLink, viewLinkWithDetails, viewOrdinalFreqText)
 
 import Data.ToDo exposing (Frequency(..))
 import Date
 import Gen.Route as Route exposing (Route)
 import Html exposing (Attribute, Html)
-import Html.Attributes exposing (class, href)
+import Html.Attributes as Attr exposing (class, href)
 import RemoteData exposing (RemoteData(..))
 import Time
 
@@ -103,3 +103,18 @@ getFreqText int freq extra =
 
     else
         "Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s" ++ extra
+
+
+ionicon : String -> Html msg
+ionicon iconName =
+    Html.node "ion-icon" [ Attr.name iconName ] []
+
+
+
+-- stylesheet : Html msg
+-- stylesheet =
+--     Html.node "link"
+--         [ Attr.rel "stylesheet"
+--         , Attr.href "http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"
+--         ]
+--         []

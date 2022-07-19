@@ -2,8 +2,9 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (dateToString, viewLink, viewOrdinalFreqText)
+import Extras.Html exposing (dateToString, ionicon, viewLink, viewOrdinalFreqText)
 import Gen.Params.Calendar exposing (Params)
+import Gen.Params.Events.Id_ exposing (Params)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
 import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
@@ -131,6 +132,7 @@ viewToDoList mbTodos =
                                     , th [] [ text "Start" ]
                                     , th [] [ text "Until" ]
                                     , th [] [ text "Enabled" ]
+                                    , th [] [ text "Events" ]
                                     ]
                                 ]
                             , List.map (\s -> viewToDoTblRow s) todos |> tbody []
@@ -174,19 +176,17 @@ viewToDoTblRow : ToDo -> Html msg
 viewToDoTblRow todo =
     tr []
         [ th [] [ viewLink [] todo.name (Route.Edit__Id_ { id = todo.uid }) ]
-
-        -- , td [] [ text (freqToStr todo.frequency) ]
-        -- , td [] [ text (String.fromInt todo.interval) ]
         , td [] [ dateToString todo.startDT |> text ]
         , td [] [ text (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency) ]
         , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
+        , td []
+            [ Html.a [ HA.href (Route.toHref (Route.Events__Id_ { id = todo.uid })) ]
+                [ Html.span [ class "icon-text" ]
+                    [ Html.span [ class "icon" ]
+                        [ ionicon "add-circle-outline"
+                        ]
+                    ]
+                , Html.span [] [ text "Done!" ]
+                ]
+            ]
         ]
-
-
-viewRepOrDate : { a | repetitionUntilForEver : Bool, repetitionUntil : String } -> String
-viewRepOrDate todo =
-    if todo.repetitionUntilForEver then
-        "forever"
-
-    else
-        "until " ++ String.left 10 todo.repetitionUntil
