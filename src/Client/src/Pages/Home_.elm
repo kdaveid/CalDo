@@ -3,6 +3,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
 import DatePicker exposing (ChangeEvent(..))
 import Extras.Html exposing (dateToString, viewLink, viewOrdinalFreqText)
+import Gen.Params.Calendar exposing (Params)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
 import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
@@ -11,7 +12,7 @@ import Http
 import Infra exposing (..)
 import Page
 import Request
-import Request.Request exposing (getPlainTextCal, getToDos)
+import Request.Request exposing (getToDos)
 import Request.Util exposing (httpErrorToString)
 import Shared
 import View exposing (View)
@@ -50,7 +51,7 @@ init shared =
       , toDos = Nothing
       , cal = Nothing
       }
-    , Cmd.batch [ reload shared.session, loadCalendarText shared.session ]
+    , reload shared.session
     )
 
 
@@ -58,7 +59,6 @@ type Msg
     = Loading
     | FetchData
     | OnFetchDataComplete (Result Http.Error (List ToDo))
-    | OnGetCalendarComplete (Result Http.Error String)
 
 
 update : Shared.Model -> Msg -> Model -> ( Model, Cmd Msg )
@@ -76,12 +76,6 @@ update _ msg model =
         OnFetchDataComplete (Err err) ->
             ( { model | isFetching = False, error = Just (httpErrorToString err) }, Cmd.none )
 
-        OnGetCalendarComplete (Ok data) ->
-            ( { model | cal = Just data }, Cmd.none )
-
-        OnGetCalendarComplete (Err err) ->
-            ( { model | cal = Just (httpErrorToString err) }, Cmd.none )
-
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
@@ -96,14 +90,6 @@ reload mbSession =
         |> Maybe.withDefault Cmd.none
 
 
-loadCalendarText : Maybe Session -> Cmd Msg
-loadCalendarText mbSession =
-    mbSession
-        |> Maybe.map .origin
-        |> Maybe.map (\origin -> getPlainTextCal origin OnGetCalendarComplete)
-        |> Maybe.withDefault Cmd.none
-
-
 view : Model -> View Msg
 view model =
     { title = "Homepage"
@@ -114,7 +100,6 @@ view model =
                 , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
                 , viewErrorMessage model.error
                 , viewToDoList model.toDos
-                , viewCalendar model.cal
                 ]
             ]
         ]
@@ -151,7 +136,7 @@ viewToDoList mbTodos =
                             , List.map (\s -> viewToDoTblRow s) todos |> tbody []
                             ]
                         ]
-                    , div [ class "card-footer" ] [ viewAddLink ]
+                    , div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
                     ]
 
             else
@@ -167,6 +152,14 @@ viewAddLink =
         [ class "card-footer-item" ]
         "Add one"
         (Route.Edit__Id_ { id = "new" })
+
+
+viewCalLink : Html msg
+viewCalLink =
+    viewLink
+        [ class "card-footer-item" ]
+        "Calendar"
+        Route.Calendar
 
 
 viewInfo : Html msg
@@ -197,18 +190,3 @@ viewRepOrDate todo =
 
     else
         "until " ++ String.left 10 todo.repetitionUntil
-
-
-viewCalendar : Maybe String -> Html msg
-viewCalendar mbCalString =
-    case mbCalString of
-        Just calStr ->
-            div [ class "section" ]
-                [ Html.article [ class "message" ]
-                    [ div [ class "message-header" ] [ Html.p [] [ text "Calendar" ] ]
-                    , div [ class "message-body" ] [ Html.code [] [ text calStr ] ]
-                    ]
-                ]
-
-        Nothing ->
-            div [] []

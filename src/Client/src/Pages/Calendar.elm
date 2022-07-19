@@ -75,9 +75,15 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> Html msg
+view : Model -> View Msg
 view model =
-    viewCalendar model.cal
+    { title = "CalDo Calendar"
+    , body =
+        [ div [ class "section " ]
+            [ viewCalendar model.cal
+            ]
+        ]
+    }
 
 
 viewCalendar : Maybe String -> Html msg
