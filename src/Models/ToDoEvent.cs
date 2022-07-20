@@ -6,7 +6,7 @@ public class ToDoEvent
 
     public DateTime Date { get; set; }
 
-    public string CalendarEventId {get;set; } = string.Empty;
+    public string CalendarToDoId { get; set; } = string.Empty;
 
     public string? Remarks { get; set; }
 

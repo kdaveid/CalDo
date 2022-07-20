@@ -3,7 +3,8 @@ module Pages.Events.Id_ exposing (Model, Msg, page)
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.Alarm exposing (Alarm, Trigger, stringToTrigger, triggerString, triggerToUiString)
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr)
-import Extras.Html exposing (block, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
+import Data.ToDoEvent exposing (..)
+import Extras.Html exposing (block, ionicon, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, button, div, footer, h1, h3, header, input, label, option, p, section, select, text, textarea)
@@ -13,9 +14,10 @@ import Infra exposing (Session)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
-import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
+import Request.Request exposing (deleteToDo, getEventList, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared
+import Task
 import View exposing (View)
 
 
@@ -35,16 +37,20 @@ page shared req =
 
 type alias Model =
     { todo : WebData ToDo
+    , events : WebData (List ToDoEvent)
     , error : Maybe String
     }
 
 
 init : Maybe Session -> String -> ( Model, Cmd Msg )
 init mbSession todoId =
-    ( { todo = Loading, error = Nothing }
+    ( { todo = Loading, error = Nothing, events = Loading }
     , Maybe.map
         (\c ->
-            getToDo c.origin todoId OnFetchDataComplete
+            Cmd.batch
+                [ getToDo c.origin todoId OnTodoDataComplete
+                , getEventList c.origin todoId OnEventDataComplete
+                ]
         )
         mbSession
         |> Maybe.withDefault Cmd.none
@@ -56,14 +62,18 @@ init mbSession todoId =
 
 
 type Msg
-    = OnFetchDataComplete (WebData ToDo)
+    = OnTodoDataComplete (WebData ToDo)
+    | OnEventDataComplete (WebData (List ToDoEvent))
 
 
 update : Maybe Session -> Key -> Msg -> Model -> ( Model, Cmd Msg )
 update mbSession pageKey msg model =
     case msg of
-        OnFetchDataComplete data ->
+        OnTodoDataComplete data ->
             ( { model | todo = data }, Cmd.none )
+
+        OnEventDataComplete data ->
+            ( { model | events = data }, Cmd.none )
 
 
 
@@ -87,6 +97,7 @@ view model =
             [ div [ class "container" ]
                 [ Html.h2 [ class "title" ] [ text "Events" ]
                 , viewTodoOrError model
+                , viewEventsOrError model
                 ]
             ]
         ]
@@ -109,21 +120,44 @@ viewTodoOrError model =
             viewError (httpErrorToString httpError)
 
 
-viewToDoOrError : Model -> Html Msg
-viewToDoOrError model =
-    case model.todo of
+viewEventsOrError : Model -> Html Msg
+viewEventsOrError model =
+    case model.events of
         RemoteData.NotAsked ->
             text "Not asked"
 
         RemoteData.Loading ->
             h3 [] [ text "Loading..." ]
 
-        RemoteData.Success todo ->
+        RemoteData.Success events ->
             div [ class "container is-max-widescreen" ]
-                []
+                (List.map
+                    (\e -> viewEvent e)
+                    events
+                )
 
         RemoteData.Failure httpError ->
             viewError (httpErrorToString httpError)
+
+
+viewEvent : ToDoEvent -> Html msg
+viewEvent evt =
+    div [ class "box" ]
+        [ Html.h4 [] [ text evt.date, viewAdjustmentIcon evt ]
+        , p [] [ text ("Remarks: " ++ evt.remarks) ]
+        ]
+
+
+viewAdjustmentIcon evt =
+    if evt.adjustCalendar then
+        Html.span [ class "icon-text is-pulled-right" ]
+            [ Html.span [ class "icon" ]
+                [ ionicon "calendar-outline"
+                ]
+            ]
+
+    else
+        div [] []
 
 
 viewError : String -> Html Msg

@@ -6,7 +6,7 @@ namespace CalDo.Functions
     public class ToDoEventService
     {
         private static string SerializeEvent(ToDoEvent e) => System.Text.Json.JsonSerializer.Serialize(e);
-        private static string FilePath(ToDoEvent item) => Path.Combine(EventsPath, $"{item.CalendarEventId}_{item.EventId}.json");
+        private static string FilePath(ToDoEvent item) => Path.Combine(EventsPath, $"{item.CalendarToDoId}_{item.EventId}.json");
 
         public IEnumerable<ToDoEvent> GetAll(string calendarEventId)
         {
@@ -27,7 +27,7 @@ namespace CalDo.Functions
         {
             if (item.EventId == 0)
             {
-                item.EventId = GetAll(item.CalendarEventId).Count() + 1;
+                item.EventId = GetAll(item.CalendarToDoId).Count() + 1;
             }
 
             File.WriteAllText(FilePath(item), SerializeEvent(item));

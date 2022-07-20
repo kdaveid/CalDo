@@ -22,6 +22,14 @@ public class EventController : ControllerBase
     [HttpGet("{id}")]
     public IEnumerable<ToDoEvent> GetForCalendarItem([FromRoute] string id)
     {
+        return new List<ToDoEvent> { new ToDoEvent
+        {
+            CalendarToDoId = id,
+            EventId = 1,
+            Remarks = "Test",
+            Date = DateTime.Now,
+            AdjustCalendar = true
+        } };
         return _service.GetAll(id).OrderByDescending(s => s.Date);
     }
 
@@ -49,8 +57,8 @@ public class EventController : ControllerBase
 
         if (item.AdjustCalendar.HasValue && item.AdjustCalendar.Value)
         {
-            Update(_calendarEventService.GetEnabled(item.CalendarEventId), true);
-            Update(_calendarEventService.GetDisabled(item.CalendarEventId), false);
+            Update(_calendarEventService.GetEnabled(item.CalendarToDoId), true);
+            Update(_calendarEventService.GetDisabled(item.CalendarToDoId), false);
         }
 
         return item;
