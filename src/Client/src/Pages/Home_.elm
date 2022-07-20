@@ -125,14 +125,14 @@ viewToDoList mbTodos =
                 div [ class "card" ]
                     [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text "To Do List" ] ]
                     , div [ class "card-content" ]
-                        [ table [ class "table" ]
+                        [ table [ class "table is-fullwidth" ]
                             [ thead []
                                 [ tr []
                                     [ th [] [ text "Name" ]
-                                    , th [] [ text "Start" ]
-                                    , th [] [ text "Until" ]
-                                    , th [] [ text "Enabled" ]
+                                    , th [] [ text "Frequency" ]
+                                    , th [] [ text "Beginning" ]
                                     , th [] [ text "Events" ]
+                                    , th [] [ text "Enabled" ]
                                     ]
                                 ]
                             , List.map (\s -> viewToDoTblRow s) todos |> tbody []
@@ -152,7 +152,7 @@ viewAddLink : Html msg
 viewAddLink =
     viewLink
         [ class "card-footer-item" ]
-        "Add one"
+        "Add todo"
         (Route.Edit__Id_ { id = "new" })
 
 
@@ -160,7 +160,7 @@ viewCalLink : Html msg
 viewCalLink =
     viewLink
         [ class "card-footer-item" ]
-        "Calendar"
+        "Show Calendar (iCal)"
         Route.Calendar
 
 
@@ -176,17 +176,18 @@ viewToDoTblRow : ToDo -> Html msg
 viewToDoTblRow todo =
     tr []
         [ th [] [ viewLink [] todo.name (Route.Edit__Id_ { id = todo.uid }) ]
-        , td [] [ dateToString todo.startDT |> text ]
         , td [] [ text (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency) ]
-        , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
+        , td [] [ dateToString todo.startDT |> text ]
         , td []
             [ Html.a [ HA.href (Route.toHref (Route.Events__Id_ { id = todo.uid })) ]
-                [ Html.span [ class "icon-text" ]
-                    [ Html.span [ class "icon" ]
-                        [ ionicon "add-circle-outline"
-                        ]
-                    ]
-                , Html.span [] [ text "Done!" ]
+                [ Html.span [] [ text "Occurrences" ]
+
+                -- ,Html.span [ class "icon-text" ]
+                --     [ Html.span [ class "icon" ]
+                --         [ ionicon "add-circle-outline"
+                --         ]
+                --     ]
                 ]
             ]
+        , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
         ]
