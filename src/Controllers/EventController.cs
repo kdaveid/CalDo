@@ -22,19 +22,19 @@ public class EventController : ControllerBase
     [HttpGet("{id}")]
     public IEnumerable<ToDoEvent> GetForCalendarItem([FromRoute] string id)
     {
-        return new List<ToDoEvent> { new ToDoEvent
-        {
-            CalendarToDoId = id,
-            EventId = 1,
-            Remarks = "Test",
-            Date = DateTime.Now,
-            AdjustCalendar = true
-        } };
+        // return new List<ToDoEvent> { new ToDoEvent
+        // {
+        //     CalendarToDoId = id,
+        //     EventId = 1,
+        //     Remarks = "Test",
+        //     Date = DateTime.Now,
+        //     AdjustCalendar = true
+        // } };
         return _service.GetAll(id).OrderByDescending(s => s.Date);
     }
 
     [HttpDelete("{calendarEventId}/{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ToDoEvent))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult Delete([FromRoute] string calendarEventId, int id)
     {
@@ -47,7 +47,7 @@ public class EventController : ControllerBase
 
         _service.Delete(item);
 
-        return Ok(item);
+        return Ok();
     }
 
     [HttpPost()]

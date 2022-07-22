@@ -6,8 +6,8 @@ import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
 import Extras.Html exposing (block, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
-import Html exposing (Html, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
-import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, selected, type_, value)
+import Html exposing (Html, a, button, div, footer, h3, header, input, label, li, nav, option, p, section, select, text, textarea, ul)
+import Html.Attributes as HA exposing (attribute, checked, class, disabled, href, id, name, selected, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Infra exposing (Session)
 import Page
@@ -121,10 +121,6 @@ update mbSession pageKey msg model =
             ( { model | todo = updateToDo (\d -> { d | enabled = val }) model.todo }, Cmd.none )
 
         OnAlarmTriggerChanged val ->
-            let
-                _ =
-                    Debug.log "alarm is now:" val
-            in
             ( { model | todo = updateToDo (\d -> { d | alarm = d.alarm |> setTrigger val }) model.todo }, Cmd.none )
 
         OnStartChanged val ->
@@ -183,7 +179,17 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "Edit", body = [ viewToDoOrError model ] }
+    { title = "Edit"
+    , body =
+        [ div [ class "section" ]
+            [ div [ class "container" ]
+                [ Html.h2 [ class "title" ] [ text "Edit ToDo" ]
+                , viewBreadCrumbs model
+                , viewToDoOrError model
+                ]
+            ]
+        ]
+    }
 
 
 viewToDoOrError : Model -> Html Msg
@@ -200,6 +206,32 @@ viewToDoOrError model =
                 [ viewEdit todo
                 , renderModal model
                 ]
+
+        RemoteData.Failure httpError ->
+            viewError (httpErrorToString httpError)
+
+
+viewBreadCrumbs : Model -> Html Msg
+viewBreadCrumbs model =
+    case model.todo of
+        RemoteData.NotAsked ->
+            text "Not asked"
+
+        RemoteData.Success todo ->
+            nav [ class "breadcrumb", attribute "aria-label" "breadcrumbs" ]
+                [ ul []
+                    [ li []
+                        [ viewLinkWithDetails [] [ text "Home" ] Gen.Route.Home_
+                        ]
+                    , li [ class "is-active" ]
+                        [ a [ href "#", attribute "aria-current" "page" ]
+                            [ text todo.name ]
+                        ]
+                    ]
+                ]
+
+        RemoteData.Loading ->
+            p [ class "subtitle" ] [ text "Loading..." ]
 
         RemoteData.Failure httpError ->
             viewError (httpErrorToString httpError)

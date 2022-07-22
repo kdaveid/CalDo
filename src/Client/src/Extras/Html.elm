@@ -6,7 +6,6 @@ import Gen.Route as Route exposing (Route)
 import Html exposing (Attribute, Html)
 import Html.Attributes as Attr exposing (class, href)
 import RemoteData exposing (RemoteData(..))
-import Time
 
 
 viewLabel : List (Html msg) -> Html msg

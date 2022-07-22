@@ -1,23 +1,22 @@
 module Pages.Events.Id_ exposing (Model, Msg, page)
 
-import Browser.Navigation exposing (Key, pushUrl)
-import Data.Alarm exposing (Alarm, Trigger, stringToTrigger, triggerString, triggerToUiString)
-import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr)
-import Data.ToDoEvent exposing (..)
-import Extras.Html exposing (block, ionicon, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
+import Browser.Navigation exposing (Key)
+import Data.ToDo exposing (Frequency(..), ToDo)
+import Data.ToDoEvent exposing (ToDoEvent)
+import Extras.Html exposing (ionicon, viewLinkWithDetails)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
-import Html exposing (Html, button, div, footer, h1, h3, header, input, label, option, p, section, select, text, textarea)
-import Html.Attributes as HA exposing (attribute, checked, class, disabled, id, name, selected, type_, value)
-import Html.Events exposing (onCheck, onClick, onInput)
+import Html exposing (Html, a, button, div, h3, input, label, li, nav, p, text, textarea, ul)
+import Html.Attributes exposing (attribute, class, href, id, placeholder, type_)
+import Html.Events exposing (onClick)
+import Http exposing (..)
 import Infra exposing (Session)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
-import Request.Request exposing (deleteToDo, getEventList, getNewToDo, getToDo, saveToDo)
+import Request.Request exposing (deleteEvent, getEventList, getToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared
-import Task
 import View exposing (View)
 
 
@@ -64,10 +63,12 @@ init mbSession todoId =
 type Msg
     = OnTodoDataComplete (WebData ToDo)
     | OnEventDataComplete (WebData (List ToDoEvent))
+    | OnDeleteEvent Int
+    | OnDeleteEventCompleted (Result Http.Error String)
 
 
 update : Maybe Session -> Key -> Msg -> Model -> ( Model, Cmd Msg )
-update mbSession pageKey msg model =
+update mbSession _ msg model =
     case msg of
         OnTodoDataComplete data ->
             ( { model | todo = data }, Cmd.none )
@@ -75,13 +76,47 @@ update mbSession pageKey msg model =
         OnEventDataComplete data ->
             ( { model | events = data }, Cmd.none )
 
+        OnDeleteEvent id ->
+            ( model, delete mbSession id model.todo )
+
+        OnDeleteEventCompleted (Ok _) ->
+            ( model
+            , case model.todo of
+                RemoteData.Success todo ->
+                    Maybe.map (\s -> getEventList s.origin todo.uid OnEventDataComplete) mbSession
+                        |> Maybe.withDefault Cmd.none
+
+                RemoteData.Failure _ ->
+                    Cmd.none
+
+                _ ->
+                    Cmd.none
+            )
+
+        OnDeleteEventCompleted (Err _) ->
+            ( model, Cmd.none )
+
+
+delete : Maybe Session -> Int -> RemoteData Http.Error ToDo -> Cmd Msg
+delete mbSession id wdTodo =
+    case wdTodo of
+        RemoteData.Success todo ->
+            Maybe.map (\s -> deleteEvent s.origin todo id OnDeleteEventCompleted) mbSession
+                |> Maybe.withDefault Cmd.none
+
+        RemoteData.Failure _ ->
+            Cmd.none
+
+        _ ->
+            Cmd.none
+
 
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -96,28 +131,13 @@ view model =
         [ div [ class "section" ]
             [ div [ class "container" ]
                 [ Html.h2 [ class "title" ] [ text "Events" ]
-                , viewTodoOrError model
+                , viewBreadCrumbs model
+                , viewCreateEventForm model
                 , viewEventsOrError model
                 ]
             ]
         ]
     }
-
-
-viewTodoOrError : Model -> Html Msg
-viewTodoOrError model =
-    case model.todo of
-        RemoteData.NotAsked ->
-            text "Not asked"
-
-        RemoteData.Loading ->
-            p [ class "subtitle" ] [ text "Loading..." ]
-
-        RemoteData.Success todo ->
-            p [ class "subtitle" ] [ text ("Todo: " ++ todo.name) ]
-
-        RemoteData.Failure httpError ->
-            viewError (httpErrorToString httpError)
 
 
 viewEventsOrError : Model -> Html Msg
@@ -140,24 +160,38 @@ viewEventsOrError model =
             viewError (httpErrorToString httpError)
 
 
-viewEvent : ToDoEvent -> Html msg
+viewEvent : ToDoEvent -> Html Msg
 viewEvent evt =
-    div [ class "box" ]
-        [ Html.h4 [] [ text evt.date, viewAdjustmentIcon evt ]
-        , p [] [ text ("Remarks: " ++ evt.remarks) ]
+    Html.article [ class "message is-info" ]
+        [ div [ class "message-header" ]
+            [ viewAdjustmentIcon evt
+            , text evt.date
+            , button [ class "delete", onClick (OnDeleteEvent evt.eventId) ] []
+            ]
+        , div [ class "message-body" ] [ viewRemarks evt.remarks ]
         ]
 
 
-viewAdjustmentIcon evt =
-    if evt.adjustCalendar then
-        Html.span [ class "icon-text is-pulled-right" ]
-            [ Html.span [ class "icon" ]
-                [ ionicon "calendar-outline"
-                ]
-            ]
+viewRemarks : String -> Html msg
+viewRemarks remarks =
+    let
+        remText =
+            if String.length remarks > 0 then
+                remarks
 
-    else
-        div [] []
+            else
+                "none"
+    in
+    p [] [ text ("Remarks: " ++ remText) ]
+
+
+viewAdjustmentIcon : a -> Html msg
+viewAdjustmentIcon _ =
+    Html.span [ class "icon-text" ]
+        [ Html.span [ class "icon" ]
+            [ ionicon "calendar-outline"
+            ]
+        ]
 
 
 viewError : String -> Html Msg
@@ -172,5 +206,59 @@ viewError errorMessage =
         ]
 
 
+viewCreateEventForm : Model -> Html msg
+viewCreateEventForm _ =
+    div [ class "box" ]
+        [ div [ class "field" ]
+            [ label [ class "label" ]
+                [ text "Date" ]
+            , div [ class "control" ]
+                [ input [ class "input", type_ "date" ]
+                    []
+                ]
+            ]
+        , div [ class "field" ]
+            [ label [ class "label" ]
+                [ text "Remarks" ]
+            , div [ class "control" ]
+                [ textarea [ class "textarea", placeholder "Specialties" ]
+                    []
+                ]
+            ]
+        , div [ class "field is-grouped" ]
+            [ div [ class "control" ]
+                [ button [ class "button is-link" ]
+                    [ text "Add event" ]
+                ]
+            , div [ class "control" ]
+                [ button [ class "button is-link is-light" ]
+                    [ text "Cancel" ]
+                ]
+            ]
+        ]
 
--- viewTodo
+
+viewBreadCrumbs : Model -> Html Msg
+viewBreadCrumbs model =
+    case model.todo of
+        RemoteData.NotAsked ->
+            text "Not asked"
+
+        RemoteData.Success todo ->
+            nav [ class "breadcrumb", attribute "aria-label" "breadcrumbs" ]
+                [ ul []
+                    [ li []
+                        [ viewLinkWithDetails [] [ text "Home" ] Gen.Route.Home_
+                        ]
+                    , li [ class "is-active" ]
+                        [ a [ href "#", attribute "aria-current" "page" ]
+                            [ text todo.name ]
+                        ]
+                    ]
+                ]
+
+        RemoteData.Loading ->
+            p [ class "subtitle" ] [ text "Loading..." ]
+
+        RemoteData.Failure httpError ->
+            viewError (httpErrorToString httpError)

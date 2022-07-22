@@ -19,6 +19,10 @@ namespace CalDo.Functions
 
         private static ToDoEvent ReadFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
             using var fs = new FileStream(filePath, FileMode.Open);
             return System.Text.Json.JsonSerializer.Deserialize<ToDoEvent>(fs) ?? new ToDoEvent();
         }

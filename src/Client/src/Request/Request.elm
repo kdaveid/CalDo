@@ -1,7 +1,7 @@
-module Request.Request exposing (deleteToDo, getEventList, getNewToDo, getPlainTextCal, getToDo, getToDos, saveToDo)
+module Request.Request exposing (deleteEvent, deleteToDo, getEventList, getNewToDo, getPlainTextCal, getToDo, getToDos, saveToDo)
 
 import Data.ToDo exposing (ToDo, toDoDecoder, toDoEncoder)
-import Data.ToDoEvent exposing (ToDoEvent, eventListDecoder)
+import Data.ToDoEvent exposing (ToDoEvent, eventDecoder, eventListDecoder)
 import Http
 import Json.Decode as JD
 import RemoteData exposing (WebData)
@@ -72,4 +72,17 @@ getEventList host id msg =
         , expect =
             eventListDecoder
                 |> Http.expectJson (RemoteData.fromResult >> msg)
+        }
+
+
+deleteEvent : String -> ToDo -> Int -> (Result Http.Error String -> msg) -> Cmd msg
+deleteEvent host todo eventId msg =
+    Http.request
+        { method = "DELETE"
+        , headers = []
+        , url = apiUrlArr host [ "events", todo.uid, String.fromInt eventId ]
+        , body = Http.emptyBody
+        , expect = Http.expectString msg
+        , timeout = Nothing
+        , tracker = Nothing
         }
