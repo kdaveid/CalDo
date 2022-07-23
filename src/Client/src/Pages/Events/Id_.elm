@@ -3,7 +3,7 @@ module Pages.Events.Id_ exposing (Model, Msg, page)
 import Browser.Navigation exposing (Key)
 import Data.ToDo exposing (Frequency(..), ToDo)
 import Data.ToDoEvent exposing (ToDoEvent)
-import Extras.Html exposing (ionicon, viewLinkWithDetails)
+import Extras.Html exposing (dateToString, ionicon, viewLinkWithDetails)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, a, button, div, h3, input, label, li, nav, p, text, textarea, ul)
@@ -227,7 +227,7 @@ viewEvent evt =
     Html.article [ class "message is-info" ]
         [ div [ class "message-header" ]
             [ viewAdjustmentIcon evt
-            , text evt.date
+            , text (dateToString evt.date)
             , button [ class "delete", onClick (OnDeleteEvent evt.eventId) ] []
             ]
         , div [ class "message-body" ] [ viewRemarks evt.remarks ]

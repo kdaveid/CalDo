@@ -462,8 +462,6 @@ viewAlarm todo =
 viewTriggerOption : Alarm -> Trigger -> Html msg
 viewTriggerOption alarm opt =
     let
-        -- _ =
-        --     Debug.log "alarm trigger = " alarm.trigger
         selected =
             HA.selected (opt == alarm.trigger)
     in
@@ -509,10 +507,7 @@ viewButtons =
             [ div [ class "buttons" ]
                 [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
                 , viewLinkWithDetails [ type_ "button", class "button is-light" ]
-                    [ --Html.span [ class "icon is-small" ] [ Html.i [ class "fas fa-times" ] [] ]
-                      --,
-                      Html.span [] [ text "Cancel" ]
-                    ]
+                    [ Html.span [] [ text "Cancel" ] ]
                     Gen.Route.Home_
                 ]
             ]
