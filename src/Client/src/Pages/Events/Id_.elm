@@ -194,8 +194,8 @@ view model =
             [ div [ class "container" ]
                 [ Html.h2 [ class "title" ] [ text "Events" ]
                 , viewBreadCrumbs model
-                , viewCreateEventForm model
                 , viewEventsOrError model
+                , viewCreateEventForm model
                 ]
             ]
         ]
@@ -212,11 +212,15 @@ viewEventsOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success events ->
-            div [ class "container is-max-widescreen" ]
-                (List.map
-                    (\e -> viewEvent e)
-                    events
-                )
+            if List.length events > 0 then
+                div [ class "container is-max-widescreen" ]
+                    (List.map
+                        (\e -> viewEvent e)
+                        events
+                    )
+
+            else
+                div [ class "box" ] [ text "Not a single ToDo done yet - add one!" ]
 
         RemoteData.Failure httpError ->
             viewError (httpErrorToString httpError)
@@ -276,42 +280,45 @@ viewCreateEventForm : Model -> Html Msg
 viewCreateEventForm model =
     case model.newEvent of
         RemoteData.Success evt ->
-            div [ class "box" ]
-                [ div [ class "field" ]
-                    [ label [ class "label" ]
-                        [ text "Date" ]
-                    , div [ class "control" ]
-                        [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
+            div [ class "section" ]
+                [ div [ class "box" ]
+                    [ Html.h4 [ class "title is-4" ] [ text "Marking a ToDo as done" ]
+                    , div [ class "field" ]
+                        [ label [ class "label" ]
+                            [ text "Date" ]
+                        , div [ class "control" ]
+                            [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
+                                []
+                            ]
+                        ]
+                    , div [ class "field" ]
+                        [ label [ class "label" ]
+                            [ text "Remarks" ]
+                        , div [ class "control" ]
+                            [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
+                                []
+                            ]
+                        ]
+                    , div [ class "field" ]
+                        [ input
+                            [ class "is-checkradio"
+                            , id "adjustCalendar"
+                            , type_ "checkbox"
+                            , name "adjustCalendar"
+                            , HA.checked evt.adjustCalendar
+                            ]
                             []
+                        , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text "Adjust calendar" ]
                         ]
-                    ]
-                , div [ class "field" ]
-                    [ label [ class "label" ]
-                        [ text "Remarks" ]
-                    , div [ class "control" ]
-                        [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
-                            []
-                        ]
-                    ]
-                , div [ class "field" ]
-                    [ input
-                        [ class "is-checkradio"
-                        , id "adjustCalendar"
-                        , type_ "checkbox"
-                        , name "adjustCalendar"
-                        , HA.checked evt.adjustCalendar
-                        ]
-                        []
-                    , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text "Adjust calendar" ]
-                    ]
-                , div [ class "field is-grouped" ]
-                    [ div [ class "control" ]
-                        [ button [ class "button is-link", onClick OnSaveNewEvent ]
-                            [ text "Add event" ]
-                        ]
-                    , div [ class "control" ]
-                        [ button [ class "button is-link is-light" ]
-                            [ text "Cancel" ]
+                    , div [ class "field is-grouped" ]
+                        [ div [ class "control" ]
+                            [ button [ class "button is-link", onClick OnSaveNewEvent ]
+                                [ text "Add event" ]
+                            ]
+                        , div [ class "control" ]
+                            [ button [ class "button is-link is-light" ]
+                                [ text "Cancel" ]
+                            ]
                         ]
                     ]
                 ]

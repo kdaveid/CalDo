@@ -131,7 +131,7 @@ viewToDoList mbTodos =
                                     [ th [] [ text "Name" ]
                                     , th [] [ text "Frequency" ]
                                     , th [] [ text "Beginning" ]
-                                    , th [] [ text "Events" ]
+                                    , th [] [ text "Done ToDos" ]
                                     , th [] [ text "Enabled" ]
                                     ]
                                 ]
@@ -180,7 +180,7 @@ viewToDoTblRow todo =
         , td [] [ dateToString todo.startDT |> text ]
         , td []
             [ Html.a [ HA.href (Route.toHref (Route.Events__Id_ { id = todo.uid })) ]
-                [ Html.span [] [ text "Occurrences" ]
+                [ Html.span [] [ text "Events" ]
 
                 -- ,Html.span [ class "icon-text" ]
                 --     [ Html.span [ class "icon" ]

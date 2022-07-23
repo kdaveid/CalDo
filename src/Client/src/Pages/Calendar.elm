@@ -1,8 +1,10 @@
 module Pages.Calendar exposing (Model, Msg, page)
 
+import Extras.Html exposing (viewLinkWithDetails)
 import Gen.Params.Calendar exposing (Params)
+import Gen.Route
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, type_)
 import Http
 import Infra exposing (Session)
 import Page
@@ -91,7 +93,12 @@ viewCalendar mbCalString =
     case mbCalString of
         Just calStr ->
             Html.article [ class "message" ]
-                [ div [ class "message-header" ] [ Html.p [] [ text "Calendar" ] ]
+                [ div [ class "message-header" ]
+                    [ Html.p [] [ text "Calendar" ]
+                    , viewLinkWithDetails [ type_ "button", class "button is-light" ]
+                        [ Html.span [] [ text "Home" ] ]
+                        Gen.Route.Home_
+                    ]
                 , div [ class "message-body" ] [ Html.pre [] [ text calStr ] ]
                 ]
 
