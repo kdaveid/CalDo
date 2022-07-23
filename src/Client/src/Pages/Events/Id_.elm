@@ -247,13 +247,17 @@ viewRemarks remarks =
     p [] [ text ("Remarks: " ++ remText) ]
 
 
-viewAdjustmentIcon : a -> Html msg
-viewAdjustmentIcon _ =
-    Html.span [ class "icon-text" ]
-        [ Html.span [ class "icon" ]
-            [ ionicon "calendar-outline"
+viewAdjustmentIcon : ToDoEvent -> Html msg
+viewAdjustmentIcon evt =
+    if evt.adjustCalendar then
+        Html.span [ class "icon-text" ]
+            [ Html.span [ class "icon" ]
+                [ ionicon "calendar-outline"
+                ]
             ]
-        ]
+
+    else
+        div [] []
 
 
 viewError : String -> Html Msg
