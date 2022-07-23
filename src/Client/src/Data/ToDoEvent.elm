@@ -1,7 +1,8 @@
-module Data.ToDoEvent exposing (ToDoEvent, eventDecoder, eventListDecoder)
+module Data.ToDoEvent exposing (ToDoEvent, eventDecoder, eventEncoder, eventListDecoder)
 
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
+import Json.Encode as JE
 
 
 type alias ToDoEvent =
@@ -26,3 +27,14 @@ eventDecoder =
         |> JD.required "date" JD.string
         |> JD.required "remarks" JD.string
         |> JD.required "adjustCalendar" JD.bool
+
+
+eventEncoder : ToDoEvent -> JE.Value
+eventEncoder evt =
+    JE.object
+        [ ( "eventId", JE.int evt.eventId )
+        , ( "calendarToDoId", JE.string evt.todoUid )
+        , ( "date", JE.string evt.date )
+        , ( "remarks", JE.string evt.remarks )
+        , ( "adjustCalendar", JE.bool evt.adjustCalendar )
+        ]

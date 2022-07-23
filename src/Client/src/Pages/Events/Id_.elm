@@ -14,7 +14,7 @@ import Infra exposing (Session)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
-import Request.Request exposing (deleteEvent, getEventList, getNewEvent, getToDo)
+import Request.Request exposing (deleteEvent, getEventList, getNewEvent, getToDo, saveEvent)
 import Request.Util exposing (httpErrorToString)
 import Shared
 import View exposing (View)
@@ -71,6 +71,8 @@ type Msg
     | OnNewEventDateChanged String
     | OnNewEventRemarksChanged String
     | OnNewEventAdjustCalendarChanged Bool
+    | OnSaveNewEvent
+    | OnSaveCompleted (WebData ToDoEvent)
 
 
 update : Maybe Session -> Key -> Msg -> Model -> ( Model, Cmd Msg )
@@ -114,10 +116,47 @@ update mbSession _ msg model =
         OnNewEventAdjustCalendarChanged val ->
             ( { model | newEvent = updateEvent (\d -> { d | adjustCalendar = val }) model.newEvent }, Cmd.none )
 
+        OnSaveNewEvent ->
+            ( model, saveWebDataEvent mbSession model.newEvent )
+
+        OnSaveCompleted wdEvent ->
+            ( model
+            , case wdEvent of
+                RemoteData.Success evt ->
+                    Maybe.map
+                        (\c ->
+                            Cmd.batch
+                                [ getEventList c.origin evt.todoUid OnEventDataComplete
+                                , getNewEvent c.origin evt.todoUid OnNewEventDataComplete
+                                ]
+                        )
+                        mbSession
+                        |> Maybe.withDefault Cmd.none
+
+                RemoteData.Failure _ ->
+                    Cmd.none
+
+                _ ->
+                    Cmd.none
+            )
+
 
 updateEvent : (ToDoEvent -> ToDoEvent) -> WebData ToDoEvent -> WebData ToDoEvent
 updateEvent fn evnt =
     RemoteData.map fn evnt
+
+
+saveWebDataEvent : Maybe Session -> WebData ToDoEvent -> Cmd Msg
+saveWebDataEvent mbSession wdEvent =
+    case wdEvent of
+        RemoteData.Success evt ->
+            Maybe.map (\s -> saveEvent s.origin evt OnSaveCompleted) mbSession |> Maybe.withDefault Cmd.none
+
+        RemoteData.Failure _ ->
+            Cmd.none
+
+        _ ->
+            Cmd.none
 
 
 delete : Maybe Session -> Int -> RemoteData Http.Error ToDo -> Cmd Msg
@@ -263,7 +302,7 @@ viewCreateEventForm model =
                     ]
                 , div [ class "field is-grouped" ]
                     [ div [ class "control" ]
-                        [ button [ class "button is-link" ]
+                        [ button [ class "button is-link", onClick OnSaveNewEvent ]
                             [ text "Add event" ]
                         ]
                     , div [ class "control" ]

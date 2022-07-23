@@ -1,11 +1,12 @@
-module Request.Request exposing (deleteEvent, deleteToDo, getEventList, getNewEvent, getNewToDo, getPlainTextCal, getToDo, getToDos, saveToDo)
+module Request.Request exposing (deleteEvent, deleteToDo, getEventList, getNewEvent, getNewToDo, getPlainTextCal, getToDo, getToDos, saveEvent, saveToDo)
 
 import Data.ToDo exposing (ToDo, toDoDecoder, toDoEncoder)
-import Data.ToDoEvent exposing (ToDoEvent, eventDecoder, eventListDecoder)
+import Data.ToDoEvent exposing (ToDoEvent, eventDecoder, eventEncoder, eventListDecoder)
 import Http
 import Json.Decode as JD
 import RemoteData exposing (WebData)
 import Request.Util exposing (..)
+import Shared exposing (Msg)
 
 
 getToDos : String -> (Result Http.Error (List ToDo) -> msg) -> Cmd msg
@@ -50,6 +51,17 @@ saveToDo host todo msg =
         , body = Http.jsonBody (toDoEncoder todo)
         , expect =
             toDoDecoder
+                |> Http.expectJson (RemoteData.fromResult >> msg)
+        }
+
+
+saveEvent : String -> ToDoEvent -> (WebData ToDoEvent -> msg) -> Cmd msg
+saveEvent host evt msg =
+    Http.post
+        { url = apiUrlArr host [ "events" ]
+        , body = Http.jsonBody (eventEncoder evt)
+        , expect =
+            eventDecoder
                 |> Http.expectJson (RemoteData.fromResult >> msg)
         }
 
