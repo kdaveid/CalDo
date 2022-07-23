@@ -1,8 +1,8 @@
 module Pages.Calendar exposing (Model, Msg, page)
 
 import Gen.Params.Calendar exposing (Params)
-import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
-import Html.Attributes as HA exposing (checked, class, type_)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
 import Http
 import Infra exposing (Session)
 import Page
@@ -14,7 +14,7 @@ import View exposing (View)
 
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
+page shared _ =
     Page.element
         { init = init shared
         , update = update
@@ -67,7 +67,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -90,10 +90,6 @@ viewCalendar : Maybe String -> Html msg
 viewCalendar mbCalString =
     case mbCalString of
         Just calStr ->
-            let
-                _ =
-                    Debug.log "cal" calStr
-            in
             Html.article [ class "message" ]
                 [ div [ class "message-header" ] [ Html.p [] [ text "Calendar" ] ]
                 , div [ class "message-body" ] [ Html.pre [] [ text calStr ] ]

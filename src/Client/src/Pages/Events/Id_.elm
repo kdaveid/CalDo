@@ -294,7 +294,7 @@ viewCreateEventForm model =
                         [ class "is-checkradio"
                         , id "adjustCalendar"
                         , type_ "checkbox"
-                        , HA.name "adjustCalendar"
+                        , name "adjustCalendar"
                         , HA.checked evt.adjustCalendar
                         ]
                         []

@@ -2,7 +2,6 @@ module Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqFromStr, freqToSt
 
 import Data.Alarm exposing (Alarm, alarmDecoder, alarmEncoder, defaultAlarm)
 import DatePicker exposing (ChangeEvent(..))
-import Html.Attributes exposing (default)
 import Json.Decode as JD
 import Json.Decode.Pipeline as JD
 import Json.Encode as JE

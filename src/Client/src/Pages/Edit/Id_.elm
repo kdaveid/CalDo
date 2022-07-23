@@ -133,7 +133,7 @@ update mbSession pageKey msg model =
             ( model, model.todo |> RemoteData.map (save mbSession) |> RemoteData.withDefault Cmd.none )
 
         OnSaveComplete data ->
-            ( { model | todo = data }, RemoteData.map (\s -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
+            ( { model | todo = data }, RemoteData.map (\_ -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
 
         OnDeleteModal show ->
             ( { model | viewDeleteModal = show }, Cmd.none )
@@ -142,7 +142,7 @@ update mbSession pageKey msg model =
             ( model, model.todo |> RemoteData.map (delete mbSession) |> RemoteData.withDefault Cmd.none )
 
         OnDeleteComplete data ->
-            ( model, RemoteData.map (\s -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
+            ( model, RemoteData.map (\_ -> pushUrl pageKey "/") data |> RemoteData.withDefault Cmd.none )
 
 
 save : Maybe Session -> ToDo -> Cmd Msg
