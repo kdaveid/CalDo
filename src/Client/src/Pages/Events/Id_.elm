@@ -7,14 +7,14 @@ import Extras.Html exposing (ionicon, viewLinkWithDetails)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, a, button, div, h3, input, label, li, nav, p, text, textarea, ul)
-import Html.Attributes exposing (attribute, class, href, id, placeholder, type_)
-import Html.Events exposing (onClick)
+import Html.Attributes as HA exposing (attribute, class, href, id, name, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Infra exposing (Session)
 import Page
 import RemoteData exposing (RemoteData(..), WebData)
 import Request
-import Request.Request exposing (deleteEvent, getEventList, getToDo)
+import Request.Request exposing (deleteEvent, getEventList, getNewEvent, getToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared
 import View exposing (View)
@@ -38,17 +38,19 @@ type alias Model =
     { todo : WebData ToDo
     , events : WebData (List ToDoEvent)
     , error : Maybe String
+    , newEvent : WebData ToDoEvent
     }
 
 
 init : Maybe Session -> String -> ( Model, Cmd Msg )
 init mbSession todoId =
-    ( { todo = Loading, error = Nothing, events = Loading }
+    ( { todo = Loading, error = Nothing, events = Loading, newEvent = Loading }
     , Maybe.map
         (\c ->
             Cmd.batch
                 [ getToDo c.origin todoId OnTodoDataComplete
                 , getEventList c.origin todoId OnEventDataComplete
+                , getNewEvent c.origin todoId OnNewEventDataComplete
                 ]
         )
         mbSession
@@ -65,6 +67,10 @@ type Msg
     | OnEventDataComplete (WebData (List ToDoEvent))
     | OnDeleteEvent Int
     | OnDeleteEventCompleted (Result Http.Error String)
+    | OnNewEventDataComplete (WebData ToDoEvent)
+    | OnNewEventDateChanged String
+    | OnNewEventRemarksChanged String
+    | OnNewEventAdjustCalendarChanged Bool
 
 
 update : Maybe Session -> Key -> Msg -> Model -> ( Model, Cmd Msg )
@@ -95,6 +101,23 @@ update mbSession _ msg model =
 
         OnDeleteEventCompleted (Err _) ->
             ( model, Cmd.none )
+
+        OnNewEventDataComplete data ->
+            ( { model | newEvent = data }, Cmd.none )
+
+        OnNewEventDateChanged newDate ->
+            ( { model | newEvent = updateEvent (\d -> { d | date = newDate }) model.newEvent }, Cmd.none )
+
+        OnNewEventRemarksChanged remarks ->
+            ( { model | newEvent = updateEvent (\d -> { d | remarks = remarks }) model.newEvent }, Cmd.none )
+
+        OnNewEventAdjustCalendarChanged val ->
+            ( { model | newEvent = updateEvent (\d -> { d | adjustCalendar = val }) model.newEvent }, Cmd.none )
+
+
+updateEvent : (ToDoEvent -> ToDoEvent) -> WebData ToDoEvent -> WebData ToDoEvent
+updateEvent fn evnt =
+    RemoteData.map fn evnt
 
 
 delete : Maybe Session -> Int -> RemoteData Http.Error ToDo -> Cmd Msg
@@ -206,36 +229,52 @@ viewError errorMessage =
         ]
 
 
-viewCreateEventForm : Model -> Html msg
-viewCreateEventForm _ =
-    div [ class "box" ]
-        [ div [ class "field" ]
-            [ label [ class "label" ]
-                [ text "Date" ]
-            , div [ class "control" ]
-                [ input [ class "input", type_ "date" ]
-                    []
+viewCreateEventForm : Model -> Html Msg
+viewCreateEventForm model =
+    case model.newEvent of
+        RemoteData.Success evt ->
+            div [ class "box" ]
+                [ div [ class "field" ]
+                    [ label [ class "label" ]
+                        [ text "Date" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
+                            []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ]
+                        [ text "Remarks" ]
+                    , div [ class "control" ]
+                        [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
+                            []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ input
+                        [ class "is-checkradio"
+                        , id "adjustCalendar"
+                        , type_ "checkbox"
+                        , HA.name "adjustCalendar"
+                        , HA.checked evt.adjustCalendar
+                        ]
+                        []
+                    , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text "Adjust calendar" ]
+                    ]
+                , div [ class "field is-grouped" ]
+                    [ div [ class "control" ]
+                        [ button [ class "button is-link" ]
+                            [ text "Add event" ]
+                        ]
+                    , div [ class "control" ]
+                        [ button [ class "button is-link is-light" ]
+                            [ text "Cancel" ]
+                        ]
+                    ]
                 ]
-            ]
-        , div [ class "field" ]
-            [ label [ class "label" ]
-                [ text "Remarks" ]
-            , div [ class "control" ]
-                [ textarea [ class "textarea", placeholder "Specialties" ]
-                    []
-                ]
-            ]
-        , div [ class "field is-grouped" ]
-            [ div [ class "control" ]
-                [ button [ class "button is-link" ]
-                    [ text "Add event" ]
-                ]
-            , div [ class "control" ]
-                [ button [ class "button is-link is-light" ]
-                    [ text "Cancel" ]
-                ]
-            ]
-        ]
+
+        _ ->
+            div [] []
 
 
 viewBreadCrumbs : Model -> Html Msg

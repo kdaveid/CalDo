@@ -22,15 +22,22 @@ public class EventController : ControllerBase
     [HttpGet("{id}")]
     public IEnumerable<ToDoEvent> GetForCalendarItem([FromRoute] string id)
     {
-        // return new List<ToDoEvent> { new ToDoEvent
-        // {
-        //     CalendarToDoId = id,
-        //     EventId = 1,
-        //     Remarks = "Test",
-        //     Date = DateTime.Now,
-        //     AdjustCalendar = true
-        // } };
         return _service.GetAll(id).OrderByDescending(s => s.Date);
+    }
+
+    [HttpGet("{calendarItemUid}/new")]
+    public ToDoEvent CreateNew([FromRoute] string calendarItemUid)
+    {
+        var nextId = _service.GetAll(calendarItemUid).Count() + 1;
+
+        return new ToDoEvent
+        {
+            CalendarToDoId = calendarItemUid,
+            Date = DateTime.Today,
+            EventId = nextId,
+            Remarks = "",
+            AdjustCalendar = false,
+        };
     }
 
     [HttpDelete("{calendarEventId}/{id}")]

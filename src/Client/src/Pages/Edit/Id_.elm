@@ -90,15 +90,6 @@ setTrigger triggerStr alarm =
     { alarm | trigger = stringToTrigger triggerStr }
 
 
-asTriggerIn : Alarm -> String -> Alarm
-asTriggerIn alarm string =
-    setTrigger string alarm
-
-
-sampleDate =
-    "2022-07-01"
-
-
 update : Maybe Session -> Key -> Msg -> Model -> ( Model, Cmd Msg )
 update mbSession pageKey msg model =
     case msg of
@@ -169,7 +160,7 @@ delete mbSession todo =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
