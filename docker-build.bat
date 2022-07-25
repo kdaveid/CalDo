@@ -1,1 +1,1 @@
-docker build -t caldo-api:dev -f .\src\Dockerfile .
+docker build -t noserdocker/caldo-api:dev -f .\src\Dockerfile .

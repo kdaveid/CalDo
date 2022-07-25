@@ -1,0 +1,1 @@
+docker build -t noserdocker/caldo-ui:dev -f .\src\Client\Dockerfile .\src\Client\
