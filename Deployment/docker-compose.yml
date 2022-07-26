@@ -10,6 +10,8 @@ services:
 
   caldo-api:
     image: noserdocker/caldo-api:latest
+    environment:
+      BASE_URL: ${BASE_URL}
     volumes:
       - ./data:/app/Data
     ports:
