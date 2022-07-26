@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   caldo-ui:
-    image: noserdocker/caldo-ui:latest
+    image: noserdocker/caldo-ui:dev
     ports:
-      - 8008:80
+      - 8009:80
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
   caldo-api:
-    image: noserdocker/caldo-api:latest
+    image: noserdocker/caldo-api:dev
     volumes:
       - ./data:/app/Data
     ports:
