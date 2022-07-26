@@ -5,6 +5,10 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalDo", "src\CalDo.csproj", "{AE785A7A-7721-4D21-BDD3-28886D597F10}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{14991EAC-6405-4BA5-B0BE-954B7974E9F0}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "Deployment\docker-compose.dcproj", "{1D6F0C39-6CDB-42A9-910B-8600960479C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{AE785A7A-7721-4D21-BDD3-28886D597F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE785A7A-7721-4D21-BDD3-28886D597F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE785A7A-7721-4D21-BDD3-28886D597F10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D6F0C39-6CDB-42A9-910B-8600960479C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D6F0C39-6CDB-42A9-910B-8600960479C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D6F0C39-6CDB-42A9-910B-8600960479C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D6F0C39-6CDB-42A9-910B-8600960479C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1D6F0C39-6CDB-42A9-910B-8600960479C7} = {14991EAC-6405-4BA5-B0BE-954B7974E9F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EC9F6A6F-47E4-4A25-881C-E5DFB234D8AE}

@@ -1,5 +1,4 @@
 ﻿using CalDo.Functions;
-using Ical.Net.Serialization;
 
 namespace CalDo.Models
 {
@@ -56,7 +55,7 @@ namespace CalDo.Models
                 EndDT = evt.DtEnd.HasDate ? evt.DtEnd.Value : null,
                 Frequency = freq.ToString(),
                 Interval = ival,
-                Alarm = a, // evt.Alarms.Any() ? evt.Alarms.First().
+                Alarm = a, 
                 Enabled = enabled,
                 RepetitionUntil = until > DateTime.MinValue ? until : null,
                 RepetitionUntilForEver = until <= DateTime.MinValue,
@@ -73,7 +72,6 @@ namespace CalDo.Models
                 Description = item.Description,
                 DtStart = item.StartDT.HasValue ? new CalDateTime(item.StartDT.Value) : null,
                 DtEnd = item.EndDT.HasValue ? new CalDateTime(item.EndDT.Value) : null,
-                Url = new Uri($"http://caldo.schatzinos.net/{item.Uid}"),
             };
 
             if (item.Interval > 0) // more than once

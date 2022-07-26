@@ -8,7 +8,7 @@ services:
       context: ../src/Client/
       dockerfile: Dockerfile
     ports:
-      - 8001:80
+      - 8008:80
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
@@ -16,7 +16,7 @@ services:
     image: caldo-api:dev
     container_name: caldo-api
     environment:
-      BASE_URL: http://localhost:8009
+      BASE_URL: http://localhost:8008
     build:
       context: ..
       dockerfile: src/Dockerfile

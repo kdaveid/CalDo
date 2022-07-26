@@ -9,12 +9,10 @@ namespace CalDo.Functions
         public IEnumerable<ToDoVM> GetAll()
         {
             var files = GetEnabled()
-                .Cast<CalendarEvent>()
                 .Select(s => ToDoVM.From(s, true))
                 .ToList();
 
             files.AddRange(GetDisabled()
-                .Cast<CalendarEvent>()
                 .Select(s => ToDoVM.From(s, false))
                 .ToList());
 
@@ -27,6 +25,7 @@ namespace CalDo.Functions
 
             return files
                 .Select(s => ReadFile(s))
+                .ModifyCalendarEventUrl()
                 .Where(s => s != null)
                 .Cast<CalendarEvent>()
                 .ToList();
@@ -38,16 +37,19 @@ namespace CalDo.Functions
 
             return files
                 .Select(s => ReadFile(s))
+                .ModifyCalendarEventUrl()
                 .Where(s => s != null)
                 .Cast<CalendarEvent>()
                 .ToList();
         }
 
         public CalendarEvent? GetEnabled(string id)
-            => ReadFile(Path.Combine(ToDoPath, $"{id}.ics"));
+            => ReadFile(Path.Combine(ToDoPath, $"{id}.ics"))
+                .ModifyCalendarEventUrl();
 
         public CalendarEvent? GetDisabled(string id)
-            => ReadFile(Path.Combine(ToDoDisabledPath, $"{id}.ics"));
+            => ReadFile(Path.Combine(ToDoDisabledPath, $"{id}.ics"))
+                .ModifyCalendarEventUrl();
 
         private static CalendarEvent? ReadFile(string filePath)
         {
