@@ -1,4 +1,4 @@
-name: Create and publish Caldo UI
+name: Create and publish Caldo UI for Develop/Test
 
 env: 
   IMAGE_NAME: caldo-ui
