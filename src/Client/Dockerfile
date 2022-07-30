@@ -9,8 +9,9 @@ FROM base as build
 WORKDIR /usr/src/app
 COPY . .
 RUN elm-spa build 
-WORKDIR mybulma
+WORKDIR /usr/src/app/mybulma
 RUN npm run build
+COPY . .
 
 FROM build as deploy
 COPY --from=build /usr/src/app/public /usr/share/nginx/html/
