@@ -8,7 +8,7 @@ on:
   push:
     branches: ['develop']
     paths:
-      - './src/Client/**'
+      - 'src/Client/**'
 
 jobs:
   build-and-push-image:
