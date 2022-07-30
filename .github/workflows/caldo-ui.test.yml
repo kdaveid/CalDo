@@ -7,8 +7,9 @@ env:
 on:
   push:
     branches: ['develop']
-
-
+    paths:
+      - './src/Client'
+      
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
