@@ -7,10 +7,9 @@ env:
 on:
   push:
     branches: ['develop']
-    paths: 
-      - '!src/Client/**'
     paths-ignore:
       - 'README.md'
+      - 'src/Client/**'
 
 
 jobs:
