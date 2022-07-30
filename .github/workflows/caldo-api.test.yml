@@ -9,7 +9,7 @@ on:
     branches: ['develop']
     paths-ignore:
       - 'README.md'
-      - './src/Client'
+      - './src/Client/**'
 
 jobs:
   build-and-push-image:
