@@ -22,6 +22,7 @@ ARG ELM_TARGET_FILE
 
 WORKDIR $ELM_ROOT
 COPY . .
+RUN apk add --update nodejs npm
 RUN npm install -g elm-spa
 RUN elm-spa build --output $ELM_TARGET_FILE --optimize
 # RUN elm make src/Main.elm --output $ELM_TARGET_FILE --optimize
