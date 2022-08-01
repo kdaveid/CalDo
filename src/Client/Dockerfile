@@ -22,7 +22,9 @@ ARG ELM_TARGET_FILE
 
 WORKDIR $ELM_ROOT
 COPY . .
-RUN elm make src/Main.elm --output $ELM_TARGET_FILE --optimize
+RUN npm install -g elm-spa
+RUN elm-spa build --output $ELM_TARGET_FILE --optimize
+# RUN elm make src/Main.elm --output $ELM_TARGET_FILE --optimize
 
 WORKDIR $BULMA_ROOT
 COPY $BULMA_SOURCE .
