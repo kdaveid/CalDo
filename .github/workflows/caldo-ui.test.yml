@@ -1,16 +1,14 @@
-name: Caldo API for Develop/Test
+name: Caldo UI for Develop/Test
 
 env: 
-  IMAGE_NAME: caldo-api
+  IMAGE_NAME: caldo-ui
   REGISTRY: ${{ secrets.DOCKERHUB_ID }}
 
 on:
   push:
     branches: ['develop']
-    paths-ignore:
-      - 'README.md'
-      - 'src/Client/**'
-
+    # paths:
+    #   - 'src/Client/**'
 
 jobs:
   build-and-push-image:
@@ -43,8 +41,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: .
-          file: ./src/Dockerfile
+          context: ./src/Client
+          file: ./src/Client/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

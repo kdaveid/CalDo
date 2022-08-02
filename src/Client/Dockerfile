@@ -1,8 +1,5 @@
 FROM nginx:alpine as base
 
-RUN apk add --update npm nodejs
-RUN npm install -g elm-spa
-
 FROM base as build
 WORKDIR /usr/src/app
 COPY . .

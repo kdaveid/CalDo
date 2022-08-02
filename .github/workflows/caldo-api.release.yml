@@ -1,4 +1,4 @@
-name: Create and publish Caldo API
+name: Caldo API for Production
 
 env: 
   IMAGE_NAME: caldo-api
