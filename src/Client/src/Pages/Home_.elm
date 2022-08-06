@@ -7,7 +7,7 @@ import Gen.Params.Calendar exposing (Params)
 import Gen.Params.Events.Id_ exposing (Params)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
-import Html exposing (Html, div, h1, p, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, dd, div, dl, dt, h1, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, type_)
 import Http
 import Infra exposing (..)
@@ -24,7 +24,7 @@ page shared _ =
     Page.element
         { init = init shared
         , update = update shared
-        , view = view
+        , view = view shared
         , subscriptions = subscriptions
         }
 
@@ -91,8 +91,8 @@ reload mbSession =
         |> Maybe.withDefault Cmd.none
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Homepage"
     , body =
         [ div [ class "section" ]
@@ -100,7 +100,7 @@ view model =
                 [ h1 [ class "title" ] [ text "CalDo" ]
                 , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
                 , viewErrorMessage model.error
-                , viewToDoList model.toDos
+                , viewToDoList shared.windowWidth model.toDos
                 ]
             ]
         ]
@@ -117,29 +117,24 @@ viewErrorMessage err =
             text ""
 
 
-viewToDoList : Maybe (List ToDo) -> Html msg
-viewToDoList mbTodos =
+viewToDoList : Int -> Maybe (List ToDo) -> Html msg
+viewToDoList windowWidth mbTodos =
     case mbTodos of
         Just todos ->
             if List.length todos >= 1 then
-                div [ class "card" ]
-                    [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text "To Do List" ] ]
-                    , div [ class "card-content" ]
-                        [ table [ class "table is-fullwidth" ]
-                            [ thead []
-                                [ tr []
-                                    [ th [] [ text "Name" ]
-                                    , th [] [ text "Frequency" ]
-                                    , th [] [ text "Beginning" ]
-                                    , th [] [ text "Done ToDos" ]
-                                    , th [] [ text "Enabled" ]
-                                    ]
-                                ]
-                            , List.map (\s -> viewToDoTblRow s) todos |> tbody []
-                            ]
+                if windowWidth > 600 then
+                    div [ class "card" ]
+                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text "To Do List" ] ]
+                        , div [ class "card-content" ]
+                            [ viewTable todos ]
+                        , div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
                         ]
-                    , div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
-                    ]
+
+                else
+                    div []
+                        [ List.map (\t -> viewBox t) todos |> div []
+                        , viewHelperBox
+                        ]
 
             else
                 viewInfo
@@ -148,11 +143,58 @@ viewToDoList mbTodos =
             viewInfo
 
 
+viewBox : ToDo -> Html msg
+viewBox todo =
+    div [ class "card" ]
+        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text todo.name ] ]
+        , div [ class "card-content" ]
+            [ div [ class "content" ]
+                [ dl [] [ dt [] [ div [] [ text "Enabled: ", Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ] ] ]
+                , dl []
+                    [ dt [] [ text "Frequency: " ]
+                    , dd [] [ text (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency) ]
+                    ]
+                , dl []
+                    [ dt [] [ text "Beginning: " ]
+                    , dd [] [ dateToString todo.startDT |> text ]
+                    ]
+                ]
+            ]
+        , div [ class "card-footer" ]
+            [ viewLink [ class "card-footer-item" ] "Edit" (Route.Edit__Id_ { id = todo.uid })
+            , viewLink [ class "card-footer-item" ] "Events" (Route.Events__Id_ { id = todo.uid })
+            ]
+        ]
+
+
+viewHelperBox : Html msg
+viewHelperBox =
+    div [ class "card m-5" ]
+        [ div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
+        ]
+
+
+viewTable : List ToDo -> Html msg
+viewTable todos =
+    table [ class "table is-fullwidth" ]
+        [ thead []
+            [ tr []
+                [ th [] [ text "Name" ]
+                , th [] [ text "Frequency" ]
+                , th [] [ text "Beginning" ]
+                , th [] [ text "Done ToDos" ]
+                , th [] [ text "Enabled" ]
+                ]
+            ]
+        , List.map (\s -> viewToDoTblRow s) todos |> tbody []
+        ]
+
+
 viewAddLink : Html msg
 viewAddLink =
     viewLink
         [ class "card-footer-item" ]
-        "Add todo"
+        "Add ToDo"
         (Route.Edit__Id_ { id = "new" })
 
 
