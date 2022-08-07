@@ -1,4 +1,4 @@
-name: Caldo UI for Develop/Test
+name: Caldo UI for Production
 
 env:
   IMAGE_NAME: caldo-ui
