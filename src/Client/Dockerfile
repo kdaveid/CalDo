@@ -1,6 +1,9 @@
 FROM nginx:alpine as base
 
 FROM base as build
+RUN apk add --update npm nodejs
+RUN npm install -g elm-spa
+
 WORKDIR /usr/src/app
 COPY . .
 RUN elm-spa build 

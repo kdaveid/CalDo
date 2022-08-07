@@ -30,11 +30,18 @@ namespace CalDo.Controllers
 
             var calendar = new Calendar();
             calendar.Events.AddRange(events);
-           
+
             var serializer = new CalendarSerializer();
-            var serializedCalendar = serializer.SerializeToString(calendar).Replace(defaultProductId, productId);;
+            var serializedCalendar = serializer.SerializeToString(calendar).Replace(defaultProductId, productId); ;
 
             return serializedCalendar;
+        }
+
+        [HttpGet("url")]
+        public string GetCalendarUrl()
+        {
+            var req = HttpContext.Request;
+            return $"{req.Scheme}://{req.Host}{req.Path.ToString()}";
         }
     }
 }

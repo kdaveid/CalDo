@@ -1,4 +1,4 @@
-module Request.Request exposing (deleteEvent, deleteToDo, getEventList, getNewEvent, getNewToDo, getPlainTextCal, getToDo, getToDos, saveEvent, saveToDo)
+module Request.Request exposing (deleteEvent, deleteToDo, getEventList, getNewEvent, getNewToDo, getPlainTextCal, getPlainTextCalUrl, getToDo, getToDos, saveEvent, saveToDo)
 
 import Data.ToDo exposing (ToDo, toDoDecoder, toDoEncoder)
 import Data.ToDoEvent exposing (ToDoEvent, eventDecoder, eventEncoder, eventListDecoder)
@@ -41,6 +41,13 @@ getPlainTextCal : String -> (Result Http.Error String -> msg) -> Cmd msg
 getPlainTextCal host msg =
     Request.Util.getString
         (apiUrlArr host [ "calendar" ])
+        msg
+
+
+getPlainTextCalUrl : String -> (Result Http.Error String -> msg) -> Cmd msg
+getPlainTextCalUrl host msg =
+    Request.Util.getString
+        (apiUrlArr host [ "calendar", "url" ])
         msg
 
 
