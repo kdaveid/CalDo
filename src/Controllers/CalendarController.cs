@@ -51,7 +51,6 @@ namespace CalDo.Controllers
             return serializer.SerializeToString(calendar).Replace(defaultProductId, productId);
         }
 
-
         [HttpGet("url")]
         public string GetCalendarUrl()
         {
