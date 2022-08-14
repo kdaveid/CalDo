@@ -1,25 +1,20 @@
 version: "3.8"
 
 services:
-  caldo-ui:
+  caldo-ui-test:
     image: noserdocker/caldo-ui:develop
     container_name: caldo-ui-test
-    deploy:
-      labels:
-        com.centurylinklabs.watchtower.scope: "watched"
+    security_opt: label:com.centurylinklabs.watchtower.scope:watched
     ports:
       - 8009:80
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
 
-  caldo-api:
+  caldo-api-test:
     image: noserdocker/caldo-api:develop
     container_name: caldo-api-test
     environment:
       BASE_URL: ${BASE_URL_TEST}
-    deploy:
-      labels:
-        com.centurylinklabs.watchtower.scope: "watched"
     volumes:
       - ./data:/app/Data
     ports:
