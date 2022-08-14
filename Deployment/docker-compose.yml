@@ -4,15 +4,26 @@ services:
   caldo-ui:
     image: noserdocker/caldo-ui:latest
     container_name: caldo-ui
+    environment:
+      COMPOSE_PROJECT_NAME: "caldo"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - caldo
 
   caldo-api:
     image: noserdocker/caldo-api:latest
     container_name: caldo-api
     environment:
       BASE_URL: ${BASE_URL}
+      COMPOSE_PROJECT_NAME: "caldo"
     volumes:
       - ./data:/app/Data
     ports:
       - 80
+    networks:
+      - caldo
+
+networks:
+  caldo:
+    driver: bridge

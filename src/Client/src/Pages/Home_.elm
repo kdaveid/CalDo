@@ -145,7 +145,7 @@ viewToDoList windowWidth mbTodos =
 
 viewBox : ToDo -> Html msg
 viewBox todo =
-    div [ class "card" ]
+    div [ class "card mb-2" ]
         [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text todo.name ] ]
         , div [ class "card-content" ]
             [ div [ class "content" ]
