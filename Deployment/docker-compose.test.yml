@@ -10,8 +10,10 @@ services:
       - 8009:80
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    environment:
-      COMPOSE_PROJECT_NAME: "caldo-test"
+    links:
+      - "caldo-api-test:caldo-api"
+    networks:
+      - caldotest
 
   caldo-api-test:
     image: noserdocker/caldo-api:develop
@@ -20,8 +22,13 @@ services:
       - label:com.centurylinklabs.watchtower.scope:watched
     environment:
       BASE_URL: ${BASE_URL_TEST}
-      COMPOSE_PROJECT_NAME: "caldo-test"
+    networks:
+      - caldotest
     volumes:
       - ./data:/app/Data
     ports:
       - 80
+
+networks:
+  caldotest:
+    driver: bridge
