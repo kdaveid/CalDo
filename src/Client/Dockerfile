@@ -11,7 +11,7 @@ COPY . .
 RUN elm-spa build 
 WORKDIR /usr/src/bulma
 COPY ./mybulma .
-RUN if [[ "$ui_mode" = "develop" ]] ; cp src/mystyles_develop.scss src/mystyles.scss ; echo "Prod mode" ; fi
+RUN if [[ "$ui_mode" = "develop" ]] then cp src/mystyles_develop.scss src/mystyles.scss fi
 RUN npm install --legacy-peer-deps && npm rebuild node-sass && npm run build
 
 FROM build as deploy
