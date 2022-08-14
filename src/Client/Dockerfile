@@ -1,6 +1,8 @@
 FROM nginx:alpine as base
 
 FROM base as build
+ARG ui_mode
+ENV ui_mode $ui_mode
 RUN apk add --update npm nodejs
 RUN npm install -g elm-spa
 
@@ -9,6 +11,7 @@ COPY . .
 RUN elm-spa build 
 WORKDIR /usr/src/bulma
 COPY ./mybulma .
+RUN if [[ "$ui_mode" = "develop" ]] ; cp src/mystyles_develop.scss src/mystyles.scss ; ; fi
 RUN npm install --legacy-peer-deps && npm rebuild node-sass && npm run build
 
 FROM build as deploy
