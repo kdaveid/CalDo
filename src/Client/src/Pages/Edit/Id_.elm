@@ -24,7 +24,7 @@ page shared req =
     Page.element
         { init = init shared.session req.params.id
         , update = update shared.session req.key
-        , view = view
+        , view = view shared
         , subscriptions = subscriptions
         }
 
@@ -168,23 +168,23 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Edit"
     , body =
         [ div [ class "section" ]
             [ div [ class "container" ]
                 [ Html.h2 [ class "title" ] [ text "Edit ToDo" ]
                 , viewBreadCrumbs model
-                , viewToDoOrError model
+                , viewToDoOrError shared.windowWidth model
                 ]
             ]
         ]
     }
 
 
-viewToDoOrError : Model -> Html Msg
-viewToDoOrError model =
+viewToDoOrError : Int -> Model -> Html Msg
+viewToDoOrError windowWidth model =
     case model.todo of
         RemoteData.NotAsked ->
             text "Not asked"
@@ -194,7 +194,7 @@ viewToDoOrError model =
 
         RemoteData.Success todo ->
             div [ class "container is-max-widescreen" ]
-                [ viewEdit todo
+                [ viewEdit todo windowWidth
                 , renderModal model
                 ]
 
@@ -302,8 +302,8 @@ renderModal model =
             div [] []
 
 
-viewEdit : ToDo -> Html Msg
-viewEdit todo =
+viewEdit : ToDo -> Int -> Html Msg
+viewEdit todo windowWidth =
     div [ class "section" ]
         [ div [ class "card" ]
             [ div [ class "card-header" ]
@@ -318,7 +318,7 @@ viewEdit todo =
                 , viewInterval todo
                 , viewRepetitionUntil todo
                 , viewAlert (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency)
-                , viewButtons
+                , viewButtons windowWidth
                 ]
             ]
         ]
@@ -496,19 +496,29 @@ viewStartEnd todo =
         ]
 
 
-viewButtons : Html Msg
-viewButtons =
-    div [ class "columns" ]
-        [ div [ class "column" ]
-            [ div [ class "buttons" ]
-                [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
-                , viewLinkWithDetails [ type_ "button", class "button is-light" ]
-                    [ Html.span [] [ text "Cancel" ] ]
-                    Gen.Route.Home_
+viewButtons : Int -> Html Msg
+viewButtons windowWidth =
+    if windowWidth > 800 then
+        div [ class "columns" ]
+            [ div [ class "column" ]
+                [ div [ class "buttons" ]
+                    [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+                    , viewLinkWithDetails [ type_ "button", class "button is-light" ]
+                        [ Html.span [] [ text "Cancel" ] ]
+                        Gen.Route.Home_
+                    ]
                 ]
+            , div [ class "column is-2" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
             ]
-        , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
-        ]
+
+    else
+        div [ class "buttons" ]
+            [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+            , viewLinkWithDetails [ type_ "button", class "button is-light" ]
+                [ Html.span [] [ text "Cancel" ] ]
+                Gen.Route.Home_
+            , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
+            ]
 
 
 subStrDate : String -> String
