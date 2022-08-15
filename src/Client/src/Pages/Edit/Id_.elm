@@ -445,27 +445,23 @@ viewAlarm todo =
             [ viewLabel [ text "Alarm" ]
             , div [ class "select" ]
                 [ select [ onInput OnAlarmTriggerChanged ]
-                    [ viewTriggerOption todo.alarm Data.Alarm.None
-                    , viewTriggerOption todo.alarm Data.Alarm.Minutes0
-                    , viewTriggerOption todo.alarm Data.Alarm.Minutes15
-                    , viewTriggerOption todo.alarm Data.Alarm.Minutes30
-                    , viewTriggerOption todo.alarm Data.Alarm.Hours1
-                    , viewTriggerOption todo.alarm Data.Alarm.Hours6
-                    , viewTriggerOption todo.alarm Data.Alarm.Hours12
-                    , viewTriggerOption todo.alarm Data.Alarm.Days1
+                    [ viewTriggerOption (todo.alarm.trigger == Data.Alarm.None) Data.Alarm.None
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Minutes0) Data.Alarm.Minutes0
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Minutes15) Data.Alarm.Minutes15
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Minutes30) Data.Alarm.Minutes30
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Hours1) Data.Alarm.Hours1
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Hours6) Data.Alarm.Hours6
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Hours12) Data.Alarm.Hours12
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Days1) Data.Alarm.Days1
                     ]
                 ]
             ]
         ]
 
 
-viewTriggerOption : Alarm -> Trigger -> Html msg
-viewTriggerOption alarm opt =
-    let
-        selected =
-            HA.selected (opt == alarm.trigger)
-    in
-    option [ value (opt |> triggerString), selected ] [ text (opt |> triggerToUiString) ]
+viewTriggerOption : Bool -> Trigger -> Html msg
+viewTriggerOption selected opt =
+    option [ value (opt |> triggerString), HA.selected selected ] [ text (opt |> triggerToUiString) ]
 
 
 viewStartEnd : { a | startDT : String, endDT : String } -> Html Msg
