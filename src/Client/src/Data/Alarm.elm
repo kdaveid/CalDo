@@ -140,7 +140,7 @@ triggerToUiString t =
             "None"
 
         Minutes0 ->
-            "At the time"
+            "At time of event"
 
         Minutes15 ->
             "15 minutes before"
