@@ -2,6 +2,7 @@ module Shared exposing
     ( Flags
     , Model
     , Msg
+    , defaultBody
     , init
     , subscriptions
     , update
@@ -9,6 +10,10 @@ module Shared exposing
 
 import Browser.Dom exposing (Viewport)
 import Browser.Events as E
+import Extras.Html exposing (viewLinkWithDetails)
+import Gen.Route
+import Html exposing (Html, a, div, h1, li, nav, p, text, ul)
+import Html.Attributes exposing (attribute, class, href)
 import Infra exposing (Session, decodeSession)
 import Json.Decode exposing (decodeValue)
 import Json.Encode exposing (Value)
@@ -56,5 +61,35 @@ subscriptions _ _ =
     E.onResize (\w _ -> GotNewWidth w)
 
 
+defaultBody : Maybe String -> List (Html msg) -> Html msg
+defaultBody breadCrumb viewElements =
+    let
+        elements =
+            [ h1 [ class "title" ] [ text "CalDo" ]
+            , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
+            , viewBreadCrumb breadCrumb
+            ]
+    in
+    div [ class "section" ]
+        [ List.append elements viewElements |> div [ class "container" ]
+        ]
 
--- Sub.none
+
+viewBreadCrumb : Maybe String -> Html msg
+viewBreadCrumb mbBreadCrumb =
+    case mbBreadCrumb of
+        Just breadCrumb ->
+            nav [ class "breadcrumb", attribute "aria-label" "breadcrumbs" ]
+                [ ul []
+                    [ li []
+                        [ viewLinkWithDetails [] [ text "Home" ] Gen.Route.Home_
+                        ]
+                    , li [ class "is-active" ]
+                        [ a [ href "#", attribute "aria-current" "page" ]
+                            [ text breadCrumb ]
+                        ]
+                    ]
+                ]
+
+        Nothing ->
+            div [] []

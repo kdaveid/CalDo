@@ -15,7 +15,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Request
 import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
-import Shared
+import Shared exposing (defaultBody)
 import View exposing (View)
 
 
@@ -172,12 +172,8 @@ view : Shared.Model -> Model -> View Msg
 view shared model =
     { title = "Edit"
     , body =
-        [ div [ class "section" ]
-            [ div [ class "container" ]
-                [ Html.h2 [ class "title" ] [ text "Edit ToDo" ]
-                , viewBreadCrumbs model
-                , viewToDoOrError shared.windowWidth model
-                ]
+        [ defaultBody (Just "Edit or Add")
+            [ viewToDoOrError shared.windowWidth model
             ]
         ]
     }
@@ -193,7 +189,7 @@ viewToDoOrError windowWidth model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success todo ->
-            div [ class "container is-max-widescreen" ]
+            div []
                 [ viewEdit todo windowWidth
                 , renderModal model
                 ]
@@ -273,22 +269,20 @@ renderModal model =
 
 viewEdit : ToDo -> Int -> Html Msg
 viewEdit todo windowWidth =
-    div [ class "section" ]
-        [ div [ class "card" ]
-            [ div [ class "card-header" ]
-                [ p [ class "card-header-title" ] [ text "Edit" ] ]
-            , div
-                [ class "card-content" ]
-                [ viewNameAndEnable todo
-                , viewDescription todo
-                , viewStartEnd todo
-                , viewAlarm todo
-                , viewRepetition todo
-                , viewInterval todo
-                , viewRepetitionUntil todo
-                , viewAlert (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency)
-                , viewButtons windowWidth
-                ]
+    div [ class "card" ]
+        [ div [ class "card-header" ]
+            [ p [ class "card-header-title" ] [ text "Edit" ] ]
+        , div
+            [ class "card-content" ]
+            [ viewNameAndEnable todo
+            , viewDescription todo
+            , viewStartEnd todo
+            , viewAlarm todo
+            , viewRepetition todo
+            , viewInterval todo
+            , viewRepetitionUntil todo
+            , viewAlert (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency)
+            , viewButtons windowWidth
             ]
         ]
 
