@@ -15,7 +15,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Request
 import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
-import Shared
+import Shared exposing (defaultBody)
 import View exposing (View)
 
 
@@ -24,7 +24,7 @@ page shared req =
     Page.element
         { init = init shared.session req.params.id
         , update = update shared.session req.key
-        , view = view
+        , view = view shared
         , subscriptions = subscriptions
         }
 
@@ -168,23 +168,19 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Shared.Model -> Model -> View Msg
+view shared model =
     { title = "Edit"
     , body =
-        [ div [ class "section" ]
-            [ div [ class "container" ]
-                [ Html.h2 [ class "title" ] [ text "Edit ToDo" ]
-                , viewBreadCrumbs model
-                , viewToDoOrError model
-                ]
+        [ defaultBody (Just "Edit or Add")
+            [ viewToDoOrError shared.windowWidth model
             ]
         ]
     }
 
 
-viewToDoOrError : Model -> Html Msg
-viewToDoOrError model =
+viewToDoOrError : Int -> Model -> Html Msg
+viewToDoOrError windowWidth model =
     case model.todo of
         RemoteData.NotAsked ->
             text "Not asked"
@@ -193,8 +189,8 @@ viewToDoOrError model =
             h3 [] [ text "Loading..." ]
 
         RemoteData.Success todo ->
-            div [ class "container is-max-widescreen" ]
-                [ viewEdit todo
+            div []
+                [ viewEdit todo windowWidth
                 , renderModal model
                 ]
 
@@ -240,37 +236,6 @@ viewError errorMessage =
         ]
 
 
-viewDeleteModal : Model -> Html Msg
-viewDeleteModal model =
-    case model.todo of
-        RemoteData.Success todo ->
-            if model.viewDeleteModal then
-                div
-                    [ class "modal" ]
-                    [ div
-                        [ class "modal-dialog" ]
-                        [ div [ class "modal-content" ]
-                            [ div [ class "modal-header" ]
-                                [ div [ class "modal-title" ] [ Html.h5 [] [ text ("Delete " ++ todo.name) ] ]
-                                ]
-                            , div [ class "modal-body" ]
-                                [ Html.p [] [ text "Do you really want to delete it?" ]
-                                ]
-                            , div [ class "modal-footer" ]
-                                [ button [ type_ "button", class "btn btn-secondary", attribute "data-bs-dismiss" "modal" ] [ text "Close" ]
-                                , button [ type_ "button", class "btn btn-danger", onClick OnDelete ] [ text "Delete" ]
-                                ]
-                            ]
-                        ]
-                    ]
-
-            else
-                div [] []
-
-        _ ->
-            div [] []
-
-
 renderModal : Model -> Html Msg
 renderModal model =
     case model.todo of
@@ -282,15 +247,15 @@ renderModal model =
                     , div [ class "modal-card" ]
                         [ header [ class "modal-card-head" ]
                             [ p [ class "modal-card-title" ]
-                                [ text ("Delete " ++ todo.name) ]
+                                [ text ("Delete \"" ++ todo.name ++ "\"") ]
                             , button [ class "delete", onClick OnDelete, attribute "aria-label" "close" ]
                                 []
                             ]
                         , section [ class "modal-card-body" ]
-                            [ text "Modal contents" ]
+                            [ text "Do you really want to delete it?" ]
                         , footer [ class "modal-card-foot" ]
-                            [ button [ type_ "button", class "btn is-secondary is-active", onClick (OnDeleteModal False) ] [ text "Cancel" ]
-                            , button [ type_ "button", class "btn is-danger", onClick OnDelete ] [ text "Delete" ]
+                            [ button [ type_ "button", class "button is-secondary is-active", onClick (OnDeleteModal False) ] [ text "Cancel" ]
+                            , button [ type_ "button", class "button is-danger", onClick OnDelete ] [ text "Delete" ]
                             ]
                         ]
                     ]
@@ -302,24 +267,22 @@ renderModal model =
             div [] []
 
 
-viewEdit : ToDo -> Html Msg
-viewEdit todo =
-    div [ class "section" ]
-        [ div [ class "card" ]
-            [ div [ class "card-header" ]
-                [ p [ class "card-header-title" ] [ text "Edit" ] ]
-            , div
-                [ class "card-content" ]
-                [ viewNameAndEnable todo
-                , viewDescription todo
-                , viewStartEnd todo
-                , viewAlarm todo
-                , viewRepetition todo
-                , viewInterval todo
-                , viewRepetitionUntil todo
-                , viewAlert (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency)
-                , viewButtons
-                ]
+viewEdit : ToDo -> Int -> Html Msg
+viewEdit todo windowWidth =
+    div [ class "card" ]
+        [ div [ class "card-header" ]
+            [ p [ class "card-header-title" ] [ text "Edit" ] ]
+        , div
+            [ class "card-content" ]
+            [ viewNameAndEnable todo
+            , viewDescription todo
+            , viewStartEnd todo
+            , viewAlarm todo
+            , viewRepetition todo
+            , viewInterval todo
+            , viewRepetitionUntil todo
+            , viewAlert (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency)
+            , viewButtons windowWidth
             ]
         ]
 
@@ -445,27 +408,23 @@ viewAlarm todo =
             [ viewLabel [ text "Alarm" ]
             , div [ class "select" ]
                 [ select [ onInput OnAlarmTriggerChanged ]
-                    [ viewTriggerOption todo.alarm Data.Alarm.None
-                    , viewTriggerOption todo.alarm Data.Alarm.Minutes0
-                    , viewTriggerOption todo.alarm Data.Alarm.Minutes15
-                    , viewTriggerOption todo.alarm Data.Alarm.Minutes30
-                    , viewTriggerOption todo.alarm Data.Alarm.Hours1
-                    , viewTriggerOption todo.alarm Data.Alarm.Hours6
-                    , viewTriggerOption todo.alarm Data.Alarm.Hours12
-                    , viewTriggerOption todo.alarm Data.Alarm.Days1
+                    [ viewTriggerOption (todo.alarm.trigger == Data.Alarm.None) Data.Alarm.None
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Minutes0) Data.Alarm.Minutes0
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Minutes15) Data.Alarm.Minutes15
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Minutes30) Data.Alarm.Minutes30
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Hours1) Data.Alarm.Hours1
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Hours6) Data.Alarm.Hours6
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Hours12) Data.Alarm.Hours12
+                    , viewTriggerOption (todo.alarm.trigger == Data.Alarm.Days1) Data.Alarm.Days1
                     ]
                 ]
             ]
         ]
 
 
-viewTriggerOption : Alarm -> Trigger -> Html msg
-viewTriggerOption alarm opt =
-    let
-        selected =
-            HA.selected (opt == alarm.trigger)
-    in
-    option [ value (opt |> triggerString), selected ] [ text (opt |> triggerToUiString) ]
+viewTriggerOption : Bool -> Trigger -> Html msg
+viewTriggerOption selected opt =
+    option [ value (opt |> triggerString), HA.selected selected ] [ text (opt |> triggerToUiString) ]
 
 
 viewStartEnd : { a | startDT : String, endDT : String } -> Html Msg
@@ -500,19 +459,29 @@ viewStartEnd todo =
         ]
 
 
-viewButtons : Html Msg
-viewButtons =
-    div [ class "columns" ]
-        [ div [ class "column" ]
-            [ div [ class "buttons" ]
-                [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
-                , viewLinkWithDetails [ type_ "button", class "button is-light" ]
-                    [ Html.span [] [ text "Cancel" ] ]
-                    Gen.Route.Home_
+viewButtons : Int -> Html Msg
+viewButtons windowWidth =
+    if windowWidth > 800 then
+        div [ class "columns" ]
+            [ div [ class "column" ]
+                [ div [ class "buttons" ]
+                    [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+                    , viewLinkWithDetails [ type_ "button", class "button is-light" ]
+                        [ Html.span [] [ text "Cancel" ] ]
+                        Gen.Route.Home_
+                    ]
                 ]
+            , div [ class "column is-2" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
             ]
-        , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
-        ]
+
+    else
+        div [ class "buttons" ]
+            [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+            , viewLinkWithDetails [ type_ "button", class "button is-light" ]
+                [ Html.span [] [ text "Cancel" ] ]
+                Gen.Route.Home_
+            , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
+            ]
 
 
 subStrDate : String -> String
