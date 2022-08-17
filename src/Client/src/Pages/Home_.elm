@@ -1,8 +1,8 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
-import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
+import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (dateToString, ionicon, viewLink, viewOrdinalFreqText)
+import Extras.Html exposing (dateToString, viewLink, viewOrdinalFreqText)
 import Gen.Params.Calendar exposing (Params)
 import Gen.Params.Events.Id_ exposing (Params)
 import Gen.Params.Home_ exposing (Params)
@@ -93,7 +93,7 @@ reload mbSession =
 
 view : Shared.Model -> Model -> View Msg
 view shared model =
-    { title = "Homepage"
+    { title = "CalDo"
     , body =
         [ div [ class "section" ]
             [ div [ class "container" ]
