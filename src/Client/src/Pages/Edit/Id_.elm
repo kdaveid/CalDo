@@ -240,37 +240,6 @@ viewError errorMessage =
         ]
 
 
-viewDeleteModal : Model -> Html Msg
-viewDeleteModal model =
-    case model.todo of
-        RemoteData.Success todo ->
-            if model.viewDeleteModal then
-                div
-                    [ class "modal" ]
-                    [ div
-                        [ class "modal-dialog" ]
-                        [ div [ class "modal-content" ]
-                            [ div [ class "modal-header" ]
-                                [ div [ class "modal-title" ] [ Html.h5 [] [ text ("Delete " ++ todo.name) ] ]
-                                ]
-                            , div [ class "modal-body" ]
-                                [ Html.p [] [ text "Do you really want to delete it?" ]
-                                ]
-                            , div [ class "modal-footer" ]
-                                [ button [ type_ "button", class "btn btn-secondary", attribute "data-bs-dismiss" "modal" ] [ text "Close" ]
-                                , button [ type_ "button", class "btn btn-danger", onClick OnDelete ] [ text "Delete" ]
-                                ]
-                            ]
-                        ]
-                    ]
-
-            else
-                div [] []
-
-        _ ->
-            div [] []
-
-
 renderModal : Model -> Html Msg
 renderModal model =
     case model.todo of
