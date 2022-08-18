@@ -34,7 +34,7 @@ name =
 
 frequency : String
 frequency = 
-    "Frequenz" 
+    "Wiederholung" 
 
 beginning : String
 beginning = 
@@ -51,3 +51,13 @@ enabled = "Aktiv"
 edit : String
 edit = 
     "Bearbeiten"
+
+
+    
+fetching : String
+fetching = 
+    "Laden ..."
+
+loaded : String
+loaded = 
+    "Geladen"

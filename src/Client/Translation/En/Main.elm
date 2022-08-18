@@ -45,3 +45,12 @@ enabled = "Enabled"
 edit : String
 edit = 
     "Edit"
+
+
+fetching : String
+fetching = 
+    "Fetching ..."
+
+loaded : String
+loaded = 
+    "Loaded"

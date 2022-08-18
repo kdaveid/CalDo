@@ -70,10 +70,10 @@ update _ msg model =
             ( model, Cmd.none )
 
         FetchData ->
-            ( { model | message = "Fetching... " }, Cmd.none )
+            ( { model | message = Translation.fetching }, Cmd.none )
 
         OnFetchDataComplete (Ok data) ->
-            ( { model | isFetching = False, message = "Loaded", toDos = Just data }, Cmd.none )
+            ( { model | isFetching = False, message = Translation.loaded, toDos = Just data }, Cmd.none )
 
         OnFetchDataComplete (Err err) ->
             ( { model | isFetching = False, error = Just (httpErrorToString err) }, Cmd.none )
