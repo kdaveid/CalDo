@@ -12,6 +12,12 @@ npm install -g elm elm-spa elm-i18n
 
 ```
 
+Build localization data
+
+```
+elm-i18n-switch -l En
+```
+
 ## running locally
 
 ```bash

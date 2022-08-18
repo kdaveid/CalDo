@@ -1,36 +1,44 @@
 module Translation.Main exposing (..)
 
-
+headerText : String
+headerText = 
+    "Die ToDo Liste mit Geschichte, in deinem Kalender"
 
 events : String
-events = "Ereignisse"
+events =
+    "Ereignisse"
 
 
 name : String
-name = 
-    "Name" 
+name =
+    "Name"
+
 
 frequency : String
-frequency = 
-    "Wiederholung" 
+frequency =
+    "Wiederholung"
+
 
 beginning : String
-beginning = 
-    "Start" 
+beginning =
+    "Start"
 
 
 enabled : String
-enabled = "Aktiv"
+enabled =
+    "Aktiv"
 
 
 edit : String
-edit = 
+edit =
     "Bearbeiten"
-    
+
+
 fetching : String
-fetching = 
+fetching =
     "Laden ..."
 
+
 loaded : String
-loaded = 
+loaded =
     "Geladen"

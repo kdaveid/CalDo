@@ -21,3 +21,7 @@ createOne =
 doneToDos : String 
 doneToDos = 
     "Fertige ToDos" 
+
+listToDos : String
+listToDos = 
+    "ToDo Liste"

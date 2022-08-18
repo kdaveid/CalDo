@@ -16,6 +16,7 @@ import Request
 import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared exposing (defaultBody)
+import Translation.Edit as Translation
 import View exposing (View)
 
 
@@ -172,7 +173,7 @@ view : Shared.Model -> Model -> View Msg
 view shared model =
     { title = "Edit"
     , body =
-        [ defaultBody (Just "Edit or Add")
+        [ defaultBody (Just Translation.addOrEdit)
             [ viewToDoOrError shared.windowWidth model
             ]
         ]

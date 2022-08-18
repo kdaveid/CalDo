@@ -15,7 +15,7 @@ import Page
 import Request
 import Request.Request exposing (getToDos)
 import Request.Util exposing (httpErrorToString)
-import Shared
+import Shared exposing (defaultBody)
 import Translation.Home as HomeTranslation
 import Translation.Main as Translation
 import View exposing (View)
@@ -97,13 +97,9 @@ view : Shared.Model -> Model -> View Msg
 view shared model =
     { title = "CalDo"
     , body =
-        [ div [ class "section" ]
-            [ div [ class "container" ]
-                [ h1 [ class "title" ] [ text "CalDo" ]
-                , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
-                , viewErrorMessage model.error
-                , viewToDoList shared.windowWidth model.toDos
-                ]
+        [ defaultBody Nothing
+            [ viewErrorMessage model.error
+            , viewToDoList shared.windowWidth model.toDos
             ]
         ]
     }
@@ -126,7 +122,7 @@ viewToDoList windowWidth mbTodos =
             if List.length todos >= 1 then
                 if windowWidth > 600 then
                     div [ class "card" ]
-                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text "To Do List" ] ]
+                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text HomeTranslation.listToDos ] ]
                         , div [ class "card-content" ]
                             [ viewTable todos ]
                         , div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
@@ -151,7 +147,14 @@ viewBox todo =
         [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text todo.name ] ]
         , div [ class "card-content" ]
             [ div [ class "content" ]
-                [ dl [] [ dt [] [ div [] [ text "Enabled: ", Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ] ] ]
+                [ dl []
+                    [ dt []
+                        [ div []
+                            [ text (Translation.enabled ++ ": ")
+                            , Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] []
+                            ]
+                        ]
+                    ]
                 , dl []
                     [ dt [] [ text (Translation.frequency ++ ": ") ]
                     , dd [] [ text (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency) ]

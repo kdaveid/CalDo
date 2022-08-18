@@ -20,6 +20,7 @@ import Json.Encode exposing (Value)
 import Request exposing (Request)
 import Result exposing (toMaybe)
 import Task
+import Translation.Main as Translation
 
 
 type alias Flags =
@@ -65,8 +66,13 @@ defaultBody : Maybe String -> List (Html msg) -> Html msg
 defaultBody breadCrumb viewElements =
     let
         elements =
-            [ h1 [ class "title" ] [ text "CalDo" ]
-            , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
+            [ Html.article [ class "media mb-5" ]
+                [ div [ class "media-left" ] [ p [ class "image is-48x48" ] [ Html.img [ attribute "src" "/assets/calDo-icon.png" ] [] ] ]
+                , div [ class "media-content" ]
+                    [ h1 [ class "title" ] [ text "CalDo" ]
+                    , p [ class "subtitle" ] [ text Translation.headerText ]
+                    ]
+                ]
             , viewBreadCrumb breadCrumb
             ]
     in
