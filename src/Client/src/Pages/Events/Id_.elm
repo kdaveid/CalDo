@@ -3,11 +3,11 @@ module Pages.Events.Id_ exposing (Model, Msg, page)
 import Browser.Navigation exposing (Key)
 import Data.ToDo exposing (Frequency(..), ToDo)
 import Data.ToDoEvent exposing (ToDoEvent)
-import Extras.Html exposing (dateToString, ionicon, viewLinkWithDetails)
+import Extras.Html exposing (dateToString, ionicon)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
-import Html exposing (Html, a, button, div, h3, input, label, li, nav, p, text, textarea, ul)
-import Html.Attributes as HA exposing (attribute, class, href, id, name, placeholder, type_, value)
+import Html exposing (Html, button, div, h3, input, label, p, text, textarea)
+import Html.Attributes as HA exposing (attribute, class, id, name, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Infra exposing (Session)
@@ -319,29 +319,3 @@ viewCreateEventForm model =
 
         _ ->
             div [] []
-
-
-viewBreadCrumbs : Model -> Html Msg
-viewBreadCrumbs model =
-    case model.todo of
-        RemoteData.NotAsked ->
-            text "Not asked"
-
-        RemoteData.Success todo ->
-            nav [ class "breadcrumb", attribute "aria-label" "breadcrumbs" ]
-                [ ul []
-                    [ li []
-                        [ viewLinkWithDetails [] [ text "Home" ] Gen.Route.Home_
-                        ]
-                    , li [ class "is-active" ]
-                        [ a [ href "#", attribute "aria-current" "page" ]
-                            [ text todo.name ]
-                        ]
-                    ]
-                ]
-
-        RemoteData.Loading ->
-            p [ class "subtitle" ] [ text "Loading..." ]
-
-        RemoteData.Failure httpError ->
-            viewError (httpErrorToString httpError)
