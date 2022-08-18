@@ -16,6 +16,7 @@ import Request
 import Request.Request exposing (getToDos)
 import Request.Util exposing (httpErrorToString)
 import Shared
+import Translation.Home as HomeTranslation
 import Translation.Main as Translation
 import View exposing (View)
 
@@ -183,7 +184,7 @@ viewTable todos =
                 [ th [] [ text Translation.name ]
                 , th [] [ text Translation.frequency ]
                 , th [] [ text Translation.beginning ]
-                , th [] [ text Translation.doneToDos ]
+                , th [] [ text HomeTranslation.doneToDos ]
                 , th [] [ text Translation.enabled ]
                 ]
             ]
@@ -195,7 +196,7 @@ viewAddLink : Html msg
 viewAddLink =
     viewLink
         [ class "card-footer-item" ]
-        Translation.addToDo
+        HomeTranslation.addToDo
         (Route.Edit__Id_ { id = "new" })
 
 
@@ -203,15 +204,15 @@ viewCalLink : Html msg
 viewCalLink =
     viewLink
         [ class "card-footer-item" ]
-        Translation.showCalendar
+        HomeTranslation.showCalendar
         Route.Calendar
 
 
 viewInfo : Html msg
 viewInfo =
     div [ class "notification" ]
-        [ text (Translation.noToDosFound ++ " - ")
-        , viewLink [] Translation.createOne (Route.Edit__Id_ { id = "new" })
+        [ text (HomeTranslation.noToDosFound ++ " - ")
+        , viewLink [] HomeTranslation.createOne (Route.Edit__Id_ { id = "new" })
         ]
 
 
