@@ -1,12 +1,15 @@
 # my new project
-> 🌳  built with [elm-spa](https://elm-spa.dev)
+
+> 🌳 built with [elm-spa](https://elm-spa.dev)
 
 ## dependencies
 
-This project requires the latest LTS version of [Node.js](https://nodejs.org/)
+This project requires the latest LTS version of [Node.js](https://nodejs.org/)  
+Then we need some extra tools for localization from [elm-i18n](https://github.com/iosphere/elm-i18n)
 
 ```bash
-npm install -g elm elm-spa
+npm install -g elm elm-spa elm-i18n
+
 ```
 
 ## running locally
