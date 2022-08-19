@@ -33,6 +33,9 @@ edit : String
 edit =
     "Bearbeiten"
 
+new : String
+new = 
+    "Neu"
 
 fetching : String
 fetching =
@@ -42,3 +45,16 @@ fetching =
 loaded : String
 loaded =
     "Geladen"
+
+
+saveAction : String
+saveAction = 
+    "Speichern"
+
+cancelAction : String
+cancelAction = 
+    "Abbrechen"
+
+deleteAction : String
+deleteAction = 
+    "Löschen"

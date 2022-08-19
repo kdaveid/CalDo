@@ -1,5 +1,17 @@
 module Translation.Edit exposing (..)
 
-addOrEdit : String
-addOrEdit = 
-    "Hinzufügen / Bearbeiten"
+description : String
+description =
+    "Beschreibung"
+
+alarm : String
+alarm =
+    "Alarm"
+
+interval : String
+interval =
+    "Interval"
+
+enableAction : String
+enableAction =
+    "Aktivieren"
