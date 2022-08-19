@@ -18,3 +18,7 @@ noEvents = "Noch kein einziges ToDo erfüllt - füg ein Ereignis hinzu!"
 
 toDoAsDone : String
 toDoAsDone = "Markiere ein ToDo als erledigt"
+
+specialtyRemark : String
+specialtyRemark = 
+    "Spezielles, Bemerkungen"

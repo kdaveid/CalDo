@@ -294,40 +294,42 @@ viewCreateEventForm model =
     in
     case model.newEvent of
         RemoteData.Success evt ->
-            div [ class "box" ]
-                [ p [] [ text Translation.toDoAsDone ]
-                , Html.h4 [ class "title is-5" ] [ text todoName ]
-                , div [ class "field" ]
-                    [ label [ class "label" ]
-                        [ text Translation.doneAt ]
-                    , div [ class "control" ]
-                        [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
+            div [ class "card mb-5" ]
+                [ div [ class "card-header" ] [ div [ class "card-header-title" ] [ text Translation.toDoAsDone ] ]
+                , div [ class "card-content" ]
+                    [ Html.h4 [ class "title is-5" ] [ text todoName ]
+                    , div [ class "field" ]
+                        [ label [ class "label" ]
+                            [ text Translation.doneAt ]
+                        , div [ class "control" ]
+                            [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
+                                []
+                            ]
+                        ]
+                    , div [ class "field" ]
+                        [ label [ class "label" ]
+                            [ text MTranslation.remarks ]
+                        , div [ class "control" ]
+                            [ textarea [ class "textarea", placeholder Translation.specialtyRemark, value evt.remarks, onInput OnNewEventRemarksChanged ]
+                                []
+                            ]
+                        ]
+                    , div [ class "field" ]
+                        [ input
+                            [ class "is-checkradio"
+                            , id "adjustCalendar"
+                            , type_ "checkbox"
+                            , name "adjustCalendar"
+                            , HA.checked evt.adjustCalendar
+                            ]
                             []
+                        , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text Translation.adjustCalendarEnabled ]
                         ]
-                    ]
-                , div [ class "field" ]
-                    [ label [ class "label" ]
-                        [ text MTranslation.remarks ]
-                    , div [ class "control" ]
-                        [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
-                            []
-                        ]
-                    ]
-                , div [ class "field" ]
-                    [ input
-                        [ class "is-checkradio"
-                        , id "adjustCalendar"
-                        , type_ "checkbox"
-                        , name "adjustCalendar"
-                        , HA.checked evt.adjustCalendar
-                        ]
-                        []
-                    , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text Translation.adjustCalendarEnabled ]
-                    ]
-                , div [ class "field is-grouped" ]
-                    [ div [ class "control" ]
-                        [ button [ class "button is-link", onClick OnSaveNewEvent ]
-                            [ text Translation.addEventAction ]
+                    , div [ class "field is-grouped" ]
+                        [ div [ class "control" ]
+                            [ button [ class "button is-link", onClick OnSaveNewEvent ]
+                                [ text Translation.addEventAction ]
+                            ]
                         ]
                     ]
                 ]
