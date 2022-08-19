@@ -11,7 +11,7 @@ module Shared exposing
 
 import Browser.Dom exposing (Viewport)
 import Browser.Events as E
-import Extras.Html exposing (viewLinkWithDetails)
+import Extras.Html exposing (ionicon, viewLinkWithDetails)
 import Gen.Route
 import Html exposing (Html, a, div, h1, li, nav, p, text, ul)
 import Html.Attributes as HA exposing (attribute, class, href)
@@ -109,14 +109,39 @@ viewBreadCrumb mbBreadCrumb =
 footer : Html msg
 footer =
     Html.footer [ class "footer has-text-grey-light" ]
-        [ div [ class "content has-text-centered" ]
-            [ p []
-                [ Html.strong [] [ text "CalDo" ]
-                , text Translation.made
-                , Html.a [ HA.href "http://github.com/kdaveid", HA.target "_blank" ] [ text "David E. Keller" ]
-                , text Translation.codeLic
-                , Html.a [ HA.href "https://opensource.org/licenses/mit-license.php", HA.target "_blank" ] [ text "MIT" ]
-                , text Translation.contentCopyRight
+        [ div [ class "content" ]
+            [ Html.nav [ class "level is-mobile" ]
+                [ div
+                    [ class "level-item has-text-centered" ]
+                    [ div []
+                        [ p [ class "heading" ] [ text "Fork me on" ]
+                        , div [ class "title" ] [ Html.a [ HA.href "https://github.com/kdaveid/Caldo", HA.target "_blank" ] [ ionicon "logo-github" ] ]
+                        ]
+                    ]
+                , div
+                    [ class "level-item has-text-centered" ]
+                    [ div []
+                        [ p [ class "heading" ] [ text "Powered by" ]
+                        , div [ class "title" ] [ Html.a [ HA.href "https://elm-lang.org", HA.target "_blank" ] [ text "Elm" ] ]
+                        ]
+                    ]
+                , div
+                    [ class "level-item has-text-centered" ]
+                    [ div []
+                        [ p [ class "heading" ] [ text "Created with" ]
+                        , div [ class "title" ] [ Html.a [ HA.href "https://bulma.io", HA.target "_blank" ] [ text "Bulma.io" ] ]
+                        ]
+                    ]
+                ]
+            , div [ class "has-text-centered" ]
+                [ p []
+                    [ Html.strong [] [ text "CalDo" ]
+                    , text Translation.made
+                    , Html.a [ HA.href "http://github.com/kdaveid", HA.target "_blank" ] [ text "David E. Keller" ]
+                    , text Translation.codeLic
+                    , Html.a [ HA.href "https://opensource.org/licenses/mit-license.php", HA.target "_blank" ] [ text "MIT" ]
+                    , text Translation.contentCopyRight
+                    ]
                 ]
             ]
         ]
