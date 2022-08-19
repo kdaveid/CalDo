@@ -1,37 +1,34 @@
 module Translation.Alarm exposing (..)
 
-freqNone : String
-freqNone = 
-    "None"
+import Data.ToDo exposing (Frequency(..))
 
-freqSecondly : String
-freqSecondly = 
-    "Secondly"
 
-freqMinutely : String
-freqMinutely = 
-    "Minutely"
+freq : Frequency -> String
+freq freqency =
+    case freqency of
+        None ->
+            "None"
 
-freqHourly : String
-freqHourly = 
-    "Hourly"
+        Secondly ->
+            "Secondly"
 
-freqDaily : String
-freqDaily = 
-    "Daily"
+        Minutely ->
+            "Minutely"
 
-freqWeekly : String
-freqWeekly = 
-    "Weekly"
+        Hourly ->
+            "Hourly"
 
-freqMonthly : String
-freqMonthly = 
-    "Monthly"
+        Daily ->
+            "Daily"
 
-freqYearly : String
-freqYearly = 
-    "Yearly"
-    
-freqUnknown : String
-freqUnknown = 
-    "Unknown"
+        Weekly ->
+            "Weekly"
+
+        Monthly ->
+            "Monthly"
+
+        Yearly ->
+            "Yearly"
+
+        Unknown ->
+            "Unknown"

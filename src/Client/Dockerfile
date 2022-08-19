@@ -9,6 +9,7 @@ RUN npm install -g elm-spa
 WORKDIR /usr/src/app
 COPY . .
 RUN elm-spa build 
+
 WORKDIR /usr/src/bulma
 COPY ./mybulma .
 RUN if [[ "$ui_mode" = "develop" ]] ; then cp src/mystyles_develop.scss src/mystyles.scss ; fi

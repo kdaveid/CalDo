@@ -340,14 +340,14 @@ viewRepetition todo =
     block
         [ viewLabel [ text Translation.repetition ]
         , div [ class "control" ]
-            [ viewFreqRadio "none" TAlarm.freqNone (todo.frequency == Data.ToDo.None)
-            , viewFreqRadio "secondly" TAlarm.freqSecondly (todo.frequency == Data.ToDo.Secondly)
-            , viewFreqRadio "minutely" TAlarm.freqMinutely (todo.frequency == Data.ToDo.Minutely)
-            , viewFreqRadio "hourly" TAlarm.freqHourly (todo.frequency == Data.ToDo.Hourly)
-            , viewFreqRadio "daily" TAlarm.freqDaily (todo.frequency == Data.ToDo.Daily)
-            , viewFreqRadio "weekly" TAlarm.freqWeekly (todo.frequency == Data.ToDo.Weekly)
-            , viewFreqRadio "monthly" TAlarm.freqMonthly (todo.frequency == Data.ToDo.Monthly)
-            , viewFreqRadio "yearly" TAlarm.freqYearly (todo.frequency == Data.ToDo.Yearly)
+            [ viewFreqRadio "none" (TAlarm.freq Data.ToDo.None) (todo.frequency == Data.ToDo.None)
+            , viewFreqRadio "secondly" (TAlarm.freq Secondly) (todo.frequency == Data.ToDo.Secondly)
+            , viewFreqRadio "minutely" (TAlarm.freq Minutely) (todo.frequency == Data.ToDo.Minutely)
+            , viewFreqRadio "hourly" (TAlarm.freq Hourly) (todo.frequency == Data.ToDo.Hourly)
+            , viewFreqRadio "daily" (TAlarm.freq Daily) (todo.frequency == Data.ToDo.Daily)
+            , viewFreqRadio "weekly" (TAlarm.freq Weekly) (todo.frequency == Data.ToDo.Weekly)
+            , viewFreqRadio "monthly" (TAlarm.freq Monthly) (todo.frequency == Data.ToDo.Monthly)
+            , viewFreqRadio "yearly" (TAlarm.freq Yearly) (todo.frequency == Data.ToDo.Yearly)
             ]
         ]
 
