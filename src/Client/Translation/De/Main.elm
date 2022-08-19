@@ -19,10 +19,13 @@ frequency =
     "Wiederholung"
 
 
-beginning : String
-beginning =
+start : String
+start =
     "Start"
 
+end : String
+end =
+    "Ende"
 
 enabled : String
 enabled =

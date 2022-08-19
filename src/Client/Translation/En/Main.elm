@@ -15,11 +15,13 @@ frequency : String
 frequency = 
     "Frequency" 
 
-beginning : String
-beginning = 
-    "Beginning" 
+start : String
+start =
+    "Start"
 
-
+end : String
+end =
+    "Ende"
 
 enabled : String
 enabled = "Enabled"
@@ -28,6 +30,9 @@ edit : String
 edit = 
     "Edit"
 
+new : String
+new = 
+    "New"
 
 fetching : String
 fetching = 
@@ -36,3 +41,17 @@ fetching =
 loaded : String
 loaded = 
     "Loaded"
+
+
+
+saveAction : String
+saveAction = 
+    "Save"
+
+cancelAction : String
+cancelAction = 
+    "Cancel"
+
+deleteAction : String
+deleteAction = 
+    "Delete"
