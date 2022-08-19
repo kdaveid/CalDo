@@ -7,7 +7,7 @@ import Gen.Params.Calendar exposing (Params)
 import Gen.Params.Events.Id_ exposing (Params)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
-import Html exposing (Html, dd, div, dl, dt, h1, p, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, dd, div, dl, dt, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, type_)
 import Http
 import Infra exposing (..)
