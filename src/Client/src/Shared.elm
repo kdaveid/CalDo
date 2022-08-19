@@ -138,7 +138,9 @@ footer =
                     [ Html.strong [] [ text "CalDo" ]
                     , text Translation.made
                     , Html.a [ HA.href "http://github.com/kdaveid", HA.target "_blank" ] [ text "David E. Keller" ]
-                    , text Translation.codeLic
+                    ]
+                , p []
+                    [ text Translation.codeLic
                     , Html.a [ HA.href "https://opensource.org/licenses/mit-license.php", HA.target "_blank" ] [ text "MIT" ]
                     , text Translation.contentCopyRight
                     ]

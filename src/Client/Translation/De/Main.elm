@@ -21,6 +21,8 @@ events : String
 events =
     "Ereignisse"
 
+remarks : String
+remarks = "Bemerkungen"
 
 name : String
 name =

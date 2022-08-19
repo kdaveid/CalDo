@@ -2,7 +2,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (dateToString, viewLink, viewOrdinalFreqText)
+import Extras.Html exposing (dateToString, ionicon, viewLink, viewOrdinalFreqText)
 import Gen.Params.Calendar exposing (Params)
 import Gen.Params.Events.Id_ exposing (Params)
 import Gen.Params.Home_ exposing (Params)
@@ -122,7 +122,7 @@ viewToDoList windowWidth mbTodos =
             if List.length todos >= 1 then
                 if windowWidth > 600 then
                     div [ class "card" ]
-                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text HomeTranslation.listToDos ] ]
+                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ div [ class "mr-1 mt-1" ] [ ionicon "list" ], text HomeTranslation.listToDos ] ]
                         , div [ class "card-content" ]
                             [ viewTable todos ]
                         , div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
@@ -238,4 +238,3 @@ viewToDoTblRow todo =
             ]
         , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
         ]
-

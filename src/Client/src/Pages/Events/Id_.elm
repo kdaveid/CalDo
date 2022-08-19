@@ -17,6 +17,8 @@ import Request
 import Request.Request exposing (deleteEvent, getEventList, getNewEvent, getToDo, saveEvent)
 import Request.Util exposing (httpErrorToString)
 import Shared exposing (defaultBody)
+import Translation.Events as Translation
+import Translation.Main as MTranslation
 import View exposing (View)
 
 
@@ -190,7 +192,7 @@ view : Model -> View Msg
 view model =
     { title = "Homepage"
     , body =
-        [ defaultBody (Just "Events")
+        [ defaultBody (Just MTranslation.events)
             [ viewEventsOrError model
             , viewCreateEventForm model
             ]
@@ -216,7 +218,7 @@ viewEventsOrError model =
                     )
 
             else
-                div [ class "box" ] [ text "Not a single ToDo done yet - add one!" ]
+                div [ class "box" ] [ text Translation.noEvents ]
 
         RemoteData.Failure httpError ->
             viewError (httpErrorToString httpError)
@@ -274,13 +276,23 @@ viewError errorMessage =
 
 viewCreateEventForm : Model -> Html Msg
 viewCreateEventForm model =
+    let
+        todoName =
+            case model.todo of
+                RemoteData.Success todo ->
+                    todo.name
+
+                _ ->
+                    "not found"
+    in
     case model.newEvent of
         RemoteData.Success evt ->
             div [ class "box" ]
-                [ Html.h4 [ class "title is-4" ] [ text "Marking a ToDo as done" ]
+                [ p [] [ text Translation.toDoAsDone ]
+                , Html.h4 [ class "title is-5" ] [ text ("ToDo: " ++ todoName) ]
                 , div [ class "field" ]
                     [ label [ class "label" ]
-                        [ text "Date" ]
+                        [ text Translation.doneAt ]
                     , div [ class "control" ]
                         [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
                             []
@@ -288,7 +300,7 @@ viewCreateEventForm model =
                     ]
                 , div [ class "field" ]
                     [ label [ class "label" ]
-                        [ text "Remarks" ]
+                        [ text MTranslation.remarks ]
                     , div [ class "control" ]
                         [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
                             []
@@ -303,16 +315,16 @@ viewCreateEventForm model =
                         , HA.checked evt.adjustCalendar
                         ]
                         []
-                    , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text "Adjust calendar" ]
+                    , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text Translation.adjustCalendarEnabled ]
                     ]
                 , div [ class "field is-grouped" ]
                     [ div [ class "control" ]
                         [ button [ class "button is-link", onClick OnSaveNewEvent ]
-                            [ text "Add event" ]
+                            [ text Translation.addEventAction ]
                         ]
                     , div [ class "control" ]
                         [ button [ class "button is-link is-light" ]
-                            [ text "Cancel" ]
+                            [ text MTranslation.cancelAction ]
                         ]
                     ]
                 ]

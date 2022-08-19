@@ -19,6 +19,9 @@ contentCopyRight = ". The website content is © 2022 by Schatzinos."
 events : String
 events = "Events"
 
+remarks : String
+remarks = "Remarks"
+
 name : String
 name = 
     "Name" 
