@@ -3,6 +3,7 @@ module Shared exposing
     , Model
     , Msg
     , defaultBody
+    , footer
     , init
     , subscriptions
     , update
@@ -13,13 +14,14 @@ import Browser.Events as E
 import Extras.Html exposing (viewLinkWithDetails)
 import Gen.Route
 import Html exposing (Html, a, div, h1, li, nav, p, text, ul)
-import Html.Attributes exposing (attribute, class, href)
+import Html.Attributes as HA exposing (attribute, class, href)
 import Infra exposing (Session, decodeSession)
 import Json.Decode exposing (decodeValue)
 import Json.Encode exposing (Value)
 import Request exposing (Request)
 import Result exposing (toMaybe)
 import Task
+import Translation.Main as Translation
 
 
 type alias Flags =
@@ -65,13 +67,22 @@ defaultBody : Maybe String -> List (Html msg) -> Html msg
 defaultBody breadCrumb viewElements =
     let
         elements =
-            [ h1 [ class "title" ] [ text "CalDo" ]
-            , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
+            [ Html.article [ class "media mb-5" ]
+                [ div [ class "media-left" ] [ p [ class "image is-48x48" ] [ Html.img [ attribute "src" "/assets/calDo-icon.png" ] [] ] ]
+                , div [ class "media-content" ]
+                    [ h1 [ class "title" ] [ text "CalDo" ]
+                    , p [ class "subtitle" ] [ text Translation.headerText ]
+                    ]
+                ]
             , viewBreadCrumb breadCrumb
             ]
+
+        all =
+            viewElements ++ [ footer ]
     in
     div [ class "section" ]
-        [ List.append elements viewElements |> div [ class "container" ]
+        [ List.append elements all
+            |> div [ class "container" ]
         ]
 
 
@@ -93,3 +104,19 @@ viewBreadCrumb mbBreadCrumb =
 
         Nothing ->
             div [] []
+
+
+footer : Html msg
+footer =
+    Html.footer [ class "footer has-text-grey-light" ]
+        [ div [ class "content has-text-centered" ]
+            [ p []
+                [ Html.strong [] [ text "CalDo" ]
+                , text Translation.made
+                , Html.a [ HA.href "http://github.com/kdaveid", HA.target "_blank" ] [ text "David E. Keller" ]
+                , text Translation.codeLic
+                , Html.a [ HA.href "https://opensource.org/licenses/mit-license.php", HA.target "_blank" ] [ text "MIT" ]
+                , text Translation.contentCopyRight
+                ]
+            ]
+        ]

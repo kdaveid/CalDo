@@ -6,7 +6,6 @@ import Http
 import Json.Decode as JD
 import RemoteData exposing (WebData)
 import Request.Util exposing (..)
-import Shared exposing (Msg)
 
 
 getToDos : String -> (Result Http.Error (List ToDo) -> msg) -> Cmd msg

@@ -1,11 +1,8 @@
 module Pages.Calendar exposing (Model, Msg, page)
 
-import Element exposing (html)
-import Extras.Html exposing (viewLinkWithDetails)
 import Gen.Params.Calendar exposing (Params)
-import Gen.Route
-import Html exposing (Html, a, div, li, nav, text, ul)
-import Html.Attributes exposing (attribute, class, href, type_)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
 import Http
 import Infra exposing (Session)
 import Page

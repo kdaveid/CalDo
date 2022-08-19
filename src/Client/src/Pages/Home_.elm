@@ -1,13 +1,13 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
-import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo, freqToStr)
+import Data.ToDo exposing (Frequency(..), ToDo, emptyToDo)
 import DatePicker exposing (ChangeEvent(..))
-import Extras.Html exposing (dateToString, ionicon, viewLink, viewOrdinalFreqText)
+import Extras.Html exposing (dateToString, viewLink, viewOrdinalFreqText)
 import Gen.Params.Calendar exposing (Params)
 import Gen.Params.Events.Id_ exposing (Params)
 import Gen.Params.Home_ exposing (Params)
 import Gen.Route as Route
-import Html exposing (Html, dd, div, dl, dt, h1, p, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, dd, div, dl, dt, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes as HA exposing (checked, class, type_)
 import Http
 import Infra exposing (..)
@@ -15,7 +15,9 @@ import Page
 import Request
 import Request.Request exposing (getToDos)
 import Request.Util exposing (httpErrorToString)
-import Shared
+import Shared exposing (defaultBody)
+import Translation.Home as HomeTranslation
+import Translation.Main as Translation
 import View exposing (View)
 
 
@@ -69,10 +71,10 @@ update _ msg model =
             ( model, Cmd.none )
 
         FetchData ->
-            ( { model | message = "Fetching... " }, Cmd.none )
+            ( { model | message = Translation.fetching }, Cmd.none )
 
         OnFetchDataComplete (Ok data) ->
-            ( { model | isFetching = False, message = "Loaded", toDos = Just data }, Cmd.none )
+            ( { model | isFetching = False, message = Translation.loaded, toDos = Just data }, Cmd.none )
 
         OnFetchDataComplete (Err err) ->
             ( { model | isFetching = False, error = Just (httpErrorToString err) }, Cmd.none )
@@ -93,15 +95,11 @@ reload mbSession =
 
 view : Shared.Model -> Model -> View Msg
 view shared model =
-    { title = "Homepage"
+    { title = "CalDo"
     , body =
-        [ div [ class "section" ]
-            [ div [ class "container" ]
-                [ h1 [ class "title" ] [ text "CalDo" ]
-                , p [ class "subtitle" ] [ text "The to do list with history, in your calendar" ]
-                , viewErrorMessage model.error
-                , viewToDoList shared.windowWidth model.toDos
-                ]
+        [ defaultBody Nothing
+            [ viewErrorMessage model.error
+            , viewToDoList shared.windowWidth model.toDos
             ]
         ]
     }
@@ -124,7 +122,7 @@ viewToDoList windowWidth mbTodos =
             if List.length todos >= 1 then
                 if windowWidth > 600 then
                     div [ class "card" ]
-                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text "To Do List" ] ]
+                        [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text HomeTranslation.listToDos ] ]
                         , div [ class "card-content" ]
                             [ viewTable todos ]
                         , div [ class "card-footer" ] [ viewAddLink, viewCalLink ]
@@ -149,20 +147,27 @@ viewBox todo =
         [ div [ class "card-header" ] [ p [ class "card-header-title" ] [ text todo.name ] ]
         , div [ class "card-content" ]
             [ div [ class "content" ]
-                [ dl [] [ dt [] [ div [] [ text "Enabled: ", Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ] ] ]
+                [ dl []
+                    [ dt []
+                        [ div []
+                            [ text (Translation.enabled ++ ": ")
+                            , Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] []
+                            ]
+                        ]
+                    ]
                 , dl []
-                    [ dt [] [ text "Frequency: " ]
+                    [ dt [] [ text (Translation.frequency ++ ": ") ]
                     , dd [] [ text (viewOrdinalFreqText todo.repetitionUntil todo.interval todo.frequency) ]
                     ]
                 , dl []
-                    [ dt [] [ text "Beginning: " ]
+                    [ dt [] [ text (Translation.start ++ ": ") ]
                     , dd [] [ dateToString todo.startDT |> text ]
                     ]
                 ]
             ]
         , div [ class "card-footer" ]
-            [ viewLink [ class "card-footer-item" ] "Edit" (Route.Edit__Id_ { id = todo.uid })
-            , viewLink [ class "card-footer-item" ] "Events" (Route.Events__Id_ { id = todo.uid })
+            [ viewLink [ class "card-footer-item" ] Translation.edit (Route.Edit__Id_ { id = todo.uid })
+            , viewLink [ class "card-footer-item" ] Translation.events (Route.Events__Id_ { id = todo.uid })
             ]
         ]
 
@@ -179,11 +184,11 @@ viewTable todos =
     table [ class "table is-fullwidth" ]
         [ thead []
             [ tr []
-                [ th [] [ text "Name" ]
-                , th [] [ text "Frequency" ]
-                , th [] [ text "Beginning" ]
-                , th [] [ text "Done ToDos" ]
-                , th [] [ text "Enabled" ]
+                [ th [] [ text Translation.name ]
+                , th [] [ text Translation.frequency ]
+                , th [] [ text Translation.start ]
+                , th [] [ text HomeTranslation.doneToDos ]
+                , th [] [ text Translation.enabled ]
                 ]
             ]
         , List.map (\s -> viewToDoTblRow s) todos |> tbody []
@@ -194,7 +199,7 @@ viewAddLink : Html msg
 viewAddLink =
     viewLink
         [ class "card-footer-item" ]
-        "Add ToDo"
+        HomeTranslation.addToDo
         (Route.Edit__Id_ { id = "new" })
 
 
@@ -202,15 +207,15 @@ viewCalLink : Html msg
 viewCalLink =
     viewLink
         [ class "card-footer-item" ]
-        "Show Calendar (iCal)"
+        HomeTranslation.showCalendar
         Route.Calendar
 
 
 viewInfo : Html msg
 viewInfo =
     div [ class "notification" ]
-        [ text "No ToDos found - "
-        , viewLink [] "create one!" (Route.Edit__Id_ { id = "new" })
+        [ text (HomeTranslation.noToDosFound ++ " - ")
+        , viewLink [] HomeTranslation.createOne (Route.Edit__Id_ { id = "new" })
         ]
 
 
@@ -222,7 +227,7 @@ viewToDoTblRow todo =
         , td [] [ dateToString todo.startDT |> text ]
         , td []
             [ Html.a [ HA.href (Route.toHref (Route.Events__Id_ { id = todo.uid })) ]
-                [ Html.span [] [ text "Events" ]
+                [ Html.span [] [ text Translation.events ]
 
                 -- ,Html.span [ class "icon-text" ]
                 --     [ Html.span [ class "icon" ]
@@ -233,3 +238,4 @@ viewToDoTblRow todo =
             ]
         , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
         ]
+
