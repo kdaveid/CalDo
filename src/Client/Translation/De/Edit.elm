@@ -15,3 +15,12 @@ interval =
 enableAction : String
 enableAction =
     "Aktivieren"
+
+repetition : String
+repetition = 
+    "Repetition"
+
+
+helpTextEntryContent : String
+helpTextEntryContent = 
+    "Inhalt des Kalender-Eintrags"

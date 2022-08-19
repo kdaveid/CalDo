@@ -16,7 +16,9 @@ import Request
 import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared exposing (defaultBody)
+import Translation.Alarm as TAlarm
 import Translation.Edit as Translation
+import Translation.Main
 import View exposing (View)
 
 
@@ -25,7 +27,7 @@ page shared req =
     Page.element
         { init = init shared.session req.params.id
         , update = update shared.session req.key
-        , view = view shared
+        , view = view shared (req.params.id == "new")
         , subscriptions = subscriptions
         }
 
@@ -169,19 +171,28 @@ subscriptions _ =
 -- VIEW
 
 
-view : Shared.Model -> Model -> View Msg
-view shared model =
-    { title = "Edit"
+view : Shared.Model -> Bool -> Model -> View Msg
+view shared isNew model =
+    { title = addOrEditStr isNew
     , body =
-        [ defaultBody (Just Translation.addOrEdit)
-            [ viewToDoOrError shared.windowWidth model
+        [ defaultBody (Just (addOrEditStr isNew))
+            [ viewToDoOrError isNew shared.windowWidth model
             ]
         ]
     }
 
 
-viewToDoOrError : Int -> Model -> Html Msg
-viewToDoOrError windowWidth model =
+addOrEditStr : Bool -> String
+addOrEditStr isNew =
+    if isNew then
+        Translation.Main.new
+
+    else
+        Translation.Main.edit
+
+
+viewToDoOrError : Bool -> Int -> Model -> Html Msg
+viewToDoOrError isNew windowWidth model =
     case model.todo of
         RemoteData.NotAsked ->
             text "Not asked"
@@ -191,7 +202,7 @@ viewToDoOrError windowWidth model =
 
         RemoteData.Success todo ->
             div []
-                [ viewEdit todo windowWidth
+                [ viewEdit todo isNew windowWidth
                 , renderModal model
                 ]
 
@@ -222,14 +233,14 @@ renderModal model =
                     , div [ class "modal-card" ]
                         [ header [ class "modal-card-head" ]
                             [ p [ class "modal-card-title" ]
-                                [ text ("Delete \"" ++ todo.name ++ "\"") ]
+                                [ text (Translation.Main.deleteAction ++ "\"" ++ todo.name ++ "\"") ]
                             , button [ class "delete", onClick OnDelete, attribute "aria-label" "close" ]
                                 []
                             ]
                         , section [ class "modal-card-body" ]
                             [ text "Do you really want to delete it?" ]
                         , footer [ class "modal-card-foot" ]
-                            [ button [ type_ "button", class "button is-secondary is-active", onClick (OnDeleteModal False) ] [ text "Cancel" ]
+                            [ button [ type_ "button", class "button is-secondary is-active", onClick (OnDeleteModal False) ] [ text Translation.Main.cancelAction ]
                             , button [ type_ "button", class "button is-danger", onClick OnDelete ] [ text "Delete" ]
                             ]
                         ]
@@ -242,11 +253,11 @@ renderModal model =
             div [] []
 
 
-viewEdit : ToDo -> Int -> Html Msg
-viewEdit todo windowWidth =
+viewEdit : ToDo -> Bool -> Int -> Html Msg
+viewEdit todo isNew windowWidth =
     div [ class "card" ]
         [ div [ class "card-header" ]
-            [ p [ class "card-header-title" ] [ text "Edit" ] ]
+            [ p [ class "card-header-title" ] [ text (addOrEditStr isNew) ] ]
         , div
             [ class "card-content" ]
             [ viewNameAndEnable todo
@@ -270,7 +281,7 @@ viewAlert str =
 viewDescription : { a | description : String } -> Html Msg
 viewDescription todo =
     block
-        [ viewLabel [ text "Description" ]
+        [ viewLabel [ text Translation.description ]
         , div [ class "control" ]
             [ textarea
                 [ HA.name "description"
@@ -283,7 +294,7 @@ viewDescription todo =
                 ]
                 []
             ]
-        , p [ class "help" ] [ text "Calendar entry content" ]
+        , p [ class "help" ] [ text Translation.helpTextEntryContent ]
         ]
 
 
@@ -291,14 +302,14 @@ viewNameAndEnable : ToDo -> Html Msg
 viewNameAndEnable todo =
     div [ class "columns" ]
         [ div [ class "column is-two-thirds" ]
-            [ viewLabel [ text "Name" ]
+            [ viewLabel [ text Translation.Main.name ]
             , div [ class "control" ]
                 [ input [ type_ "text", class "input", HA.placeholder "Clean the washmaschine", onInput OnNameChange, value todo.name ] []
                 ]
             , p [ class "help" ] [ text "Summary / Name of the calendar entry" ]
             ]
         , div [ class "column" ]
-            [ viewLabel [ text "Enable" ]
+            [ viewLabel [ text Translation.enableAction ]
             , div [ class "field" ]
                 [ input
                     [ class "is-checkradio"
@@ -308,7 +319,7 @@ viewNameAndEnable todo =
                     , checked todo.enabled
                     ]
                     []
-                , label [ attribute "for" "enabledCheckbox", onClick (OnEnabledChanged (not todo.enabled)) ] [ text "Enabled" ]
+                , label [ attribute "for" "enabledCheckbox", onClick (OnEnabledChanged (not todo.enabled)) ] [ text Translation.Main.enabled ]
                 ]
             ]
         ]
@@ -327,16 +338,16 @@ viewInterval todo =
 viewRepetition : ToDo -> Html Msg
 viewRepetition todo =
     block
-        [ viewLabel [ text "Repetition" ]
+        [ viewLabel [ text Translation.repetition ]
         , div [ class "control" ]
-            [ viewFreqRadio "none" "Never" (todo.frequency == Data.ToDo.None)
-            , viewFreqRadio "secondly" "Secondly" (todo.frequency == Data.ToDo.Secondly)
-            , viewFreqRadio "minutely" "Minutely" (todo.frequency == Data.ToDo.Minutely)
-            , viewFreqRadio "hourly" "Hourly" (todo.frequency == Data.ToDo.Hourly)
-            , viewFreqRadio "daily" "Daily" (todo.frequency == Data.ToDo.Daily)
-            , viewFreqRadio "weekly" "Weekly" (todo.frequency == Data.ToDo.Weekly)
-            , viewFreqRadio "monthly" "Monthly" (todo.frequency == Data.ToDo.Monthly)
-            , viewFreqRadio "yearly" "Yearly" (todo.frequency == Data.ToDo.Yearly)
+            [ viewFreqRadio "none" TAlarm.freqNone (todo.frequency == Data.ToDo.None)
+            , viewFreqRadio "secondly" TAlarm.freqSecondly (todo.frequency == Data.ToDo.Secondly)
+            , viewFreqRadio "minutely" TAlarm.freqMinutely (todo.frequency == Data.ToDo.Minutely)
+            , viewFreqRadio "hourly" TAlarm.freqHourly (todo.frequency == Data.ToDo.Hourly)
+            , viewFreqRadio "daily" TAlarm.freqDaily (todo.frequency == Data.ToDo.Daily)
+            , viewFreqRadio "weekly" TAlarm.freqWeekly (todo.frequency == Data.ToDo.Weekly)
+            , viewFreqRadio "monthly" TAlarm.freqMonthly (todo.frequency == Data.ToDo.Monthly)
+            , viewFreqRadio "yearly" TAlarm.freqYearly (todo.frequency == Data.ToDo.Yearly)
             ]
         ]
 
@@ -344,20 +355,20 @@ viewRepetition todo =
 viewRepetitionUntil : ToDo -> Html Msg
 viewRepetitionUntil todo =
     block
-        [ viewLabel [ text "Until" ]
+        [ viewLabel [ text Translation.Main.until ]
         , div [ class "control" ]
             [ div [ class "columns" ]
                 [ div [ class "column" ]
                     [ div [ class "field" ]
                         [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forEverCheckbox", checked todo.repetitionUntilForEver, onCheck OnRepetitionForEver ] []
-                        , label [ HA.for "forEverCheckbox" ] [ text " For ever" ]
+                        , label [ HA.for "forEverCheckbox" ] [ text (" " ++ Translation.Main.dateForEver) ]
                         ]
                     ]
                 , div [ class "column" ]
                     [ div
                         [ class "field" ]
                         [ input [ type_ "radio", class "is-checkradio is-info is-light", name "repetitionUntil", HA.id "forDate", checked (not todo.repetitionUntilForEver), onCheck OnRepetitionUntilDate ] []
-                        , label [ HA.for "forDate" ] [ text " Date" ]
+                        , label [ HA.for "forDate" ] [ text (" " ++ Translation.Main.date) ]
                         ]
                     ]
                 , div [ class "column is-half" ]
@@ -407,7 +418,7 @@ viewStartEnd todo =
     block
         [ div [ class "columns" ]
             [ div [ class "column" ]
-                [ viewLabel [ text "Start" ]
+                [ viewLabel [ text Translation.Main.start ]
                 , div [ class "control" ]
                     [ input
                         [ type_ "datetime-local"
@@ -419,7 +430,7 @@ viewStartEnd todo =
                     ]
                 ]
             , div [ class "column" ]
-                [ viewLabel [ text "End" ]
+                [ viewLabel [ text Translation.Main.end ]
                 , div [ class "control" ]
                     [ input
                         [ type_ "datetime-local"
@@ -440,22 +451,22 @@ viewButtons windowWidth =
         div [ class "columns" ]
             [ div [ class "column" ]
                 [ div [ class "buttons" ]
-                    [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+                    [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text Translation.Main.saveAction ]
                     , viewLinkWithDetails [ type_ "button", class "button is-light" ]
-                        [ Html.span [] [ text "Cancel" ] ]
+                        [ Html.span [] [ text Translation.Main.cancelAction ] ]
                         Gen.Route.Home_
                     ]
                 ]
-            , div [ class "column is-2" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
+            , div [ class "column is-2" ] [ button [ type_ "button", class "button is-danger is-outlined is-pulled-right", onClick (OnDeleteModal True) ] [ text Translation.Main.deleteAction ] ]
             ]
 
     else
         div [ class "buttons" ]
-            [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text "Save" ]
+            [ button [ type_ "submit", class "button is-primary", onClick OnSave ] [ text Translation.Main.saveAction ]
             , viewLinkWithDetails [ type_ "button", class "button is-light" ]
-                [ Html.span [] [ text "Cancel" ] ]
+                [ Html.span [] [ text Translation.Main.cancelAction ] ]
                 Gen.Route.Home_
-            , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined", onClick (OnDeleteModal True) ] [ text "Delete" ] ]
+            , div [ class "column" ] [ button [ type_ "button", class "button is-danger is-outlined", onClick (OnDeleteModal True) ] [ text Translation.Main.deleteAction ] ]
             ]
 
 

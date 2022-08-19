@@ -18,6 +18,11 @@ frequency : String
 frequency =
     "Wiederholung"
 
+date : String
+date = "Datum"
+
+dateForEver : String
+dateForEver = "Für immer"
 
 start : String
 start =
@@ -26,6 +31,10 @@ start =
 end : String
 end =
     "Ende"
+
+until : String
+until = 
+    "Bis zum"
 
 enabled : String
 enabled =

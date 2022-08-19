@@ -15,6 +15,12 @@ frequency : String
 frequency = 
     "Frequency" 
 
+date : String
+date = "Date"
+
+dateForEver : String
+dateForEver = "For ever"
+
 start : String
 start =
     "Start"
@@ -22,6 +28,10 @@ start =
 end : String
 end =
     "Ende"
+
+until : String
+until = 
+    "Until"
 
 enabled : String
 enabled = "Enabled"
