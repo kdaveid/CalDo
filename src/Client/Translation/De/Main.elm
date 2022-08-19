@@ -4,6 +4,10 @@ headerText : String
 headerText = 
     "Die ToDo Liste mit Geschichte, in deinem Kalender"
 
+calendar : String
+calendar = "Kalender"
+
+
 made : String
 made = " mit ❤️ gemacht von "
 
@@ -79,3 +83,8 @@ cancelAction =
 deleteAction : String
 deleteAction = 
     "Löschen"
+
+
+error : String
+error = 
+    "Fehler."

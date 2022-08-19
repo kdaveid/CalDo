@@ -10,6 +10,8 @@ import Request
 import Request.Request exposing (getPlainTextCal, getPlainTextCalUrl)
 import Request.Util exposing (httpErrorToString)
 import Shared exposing (defaultBody)
+import Translation.Calendar
+import Translation.Main
 import View exposing (View)
 
 
@@ -94,7 +96,7 @@ subscriptions _ =
 
 view : Model -> View Msg
 view model =
-    { title = "CalDo Calendar"
+    { title = "CalDo " ++ Translation.Main.calendar
     , body =
         [ defaultBody (Just "Calendar")
             [ viewCalendarUrl model
@@ -108,7 +110,7 @@ viewCalendar : Model -> Html msg
 viewCalendar model =
     Html.article [ class "message" ]
         [ div [ class "message-header" ]
-            [ Html.p [] [ text "Calendar" ] ]
+            [ Html.p [] [ text Translation.Main.calendar ] ]
         , div [ class "message-body" ]
             [ case model.cal of
                 Just calStr ->
@@ -125,7 +127,7 @@ viewCalendarUrl model =
     Html.article [ class "message" ]
         [ div [ class "message-header" ]
             [ Html.p []
-                [ text "Calendar Url" ]
+                [ text Translation.Calendar.calendarUrl ]
             ]
         , div [ class "message-body" ]
             [ let
@@ -135,10 +137,10 @@ viewCalendarUrl model =
                             url
 
                         Nothing ->
-                            "unfortunately no url information available"
+                            Translation.Main.error
               in
               div []
-                [ div [ class "content" ] [ text "You can subscribe to the calendar with this url: " ]
+                [ div [ class "content" ] [ Translation.Calendar.calendarUrlExplanation ":" |> text ]
                 , Html.pre [] [ text urlText ]
                 ]
             ]
