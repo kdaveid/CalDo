@@ -3,6 +3,7 @@ module Shared exposing
     , Model
     , Msg
     , defaultBody
+    , footer
     , init
     , subscriptions
     , update
@@ -13,7 +14,7 @@ import Browser.Events as E
 import Extras.Html exposing (viewLinkWithDetails)
 import Gen.Route
 import Html exposing (Html, a, div, h1, li, nav, p, text, ul)
-import Html.Attributes exposing (attribute, class, href)
+import Html.Attributes as HA exposing (attribute, class, href)
 import Infra exposing (Session, decodeSession)
 import Json.Decode exposing (decodeValue)
 import Json.Encode exposing (Value)
@@ -75,9 +76,13 @@ defaultBody breadCrumb viewElements =
                 ]
             , viewBreadCrumb breadCrumb
             ]
+
+        all =
+            viewElements ++ [ footer ]
     in
     div [ class "section" ]
-        [ List.append elements viewElements |> div [ class "container" ]
+        [ List.append elements all
+            |> div [ class "container" ]
         ]
 
 
@@ -99,3 +104,19 @@ viewBreadCrumb mbBreadCrumb =
 
         Nothing ->
             div [] []
+
+
+footer : Html msg
+footer =
+    Html.footer [ class "footer has-text-grey-light" ]
+        [ div [ class "content has-text-centered" ]
+            [ p []
+                [ Html.strong [] [ text "CalDo" ]
+                , text Translation.made
+                , Html.a [ HA.href "http://github.com/kdaveid", HA.target "_blank" ] [ text "David E. Keller" ]
+                , text Translation.codeLic
+                , Html.a [ HA.href "https://opensource.org/licenses/mit-license.php", HA.target "_blank" ] [ text "MIT" ]
+                , text Translation.contentCopyRight
+                ]
+            ]
+        ]

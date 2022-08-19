@@ -13,7 +13,7 @@ RUN npm install --legacy-peer-deps && npm rebuild node-sass && npm run build
 
 WORKDIR /usr/src/app
 COPY . .
-COPY Translation/De src/Translation
+COPY Translation/En src/Translation
 RUN elm-spa build 
 
 FROM build as deploy

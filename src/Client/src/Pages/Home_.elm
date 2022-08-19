@@ -238,3 +238,4 @@ viewToDoTblRow todo =
             ]
         , td [] [ Html.input [ type_ "checkbox", checked todo.enabled, HA.disabled True ] [] ]
         ]
+

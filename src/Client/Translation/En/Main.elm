@@ -4,6 +4,15 @@ headerText : String
 headerText = 
     "The to do list with history, in your calendar"
 
+made : String
+made = " made with ❤️ by "
+
+codeLic : String
+codeLic = ". The source code is licensed "
+
+contentCopyRight : String
+contentCopyRight = ". The website content is © 2022 by Schatzinos."
+
 events : String
 events = "Events"
 
