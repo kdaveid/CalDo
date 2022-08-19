@@ -23,3 +23,7 @@ repetition =
 helpTextEntryContent : String
 helpTextEntryContent = 
     "Calendar entry content"
+
+helpTextName : String
+helpTextName = 
+    "Summary / Name of the calendar entry"

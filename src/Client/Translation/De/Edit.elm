@@ -18,9 +18,13 @@ enableAction =
 
 repetition : String
 repetition = 
-    "Repetition"
+    "Wiederholung"
 
 
 helpTextEntryContent : String
 helpTextEntryContent = 
     "Inhalt des Kalender-Eintrags"
+
+helpTextName : String
+helpTextName = 
+    "Zusammenfassung / Name des Kalendereintrages"

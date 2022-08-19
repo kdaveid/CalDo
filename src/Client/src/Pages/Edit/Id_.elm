@@ -3,7 +3,7 @@ module Pages.Edit.Id_ exposing (Model, Msg, page)
 import Browser.Navigation exposing (Key, pushUrl)
 import Data.Alarm exposing (Alarm, Trigger, stringToTrigger, triggerString, triggerToUiString)
 import Data.ToDo exposing (Frequency(..), ToDo, freqFromStr)
-import Extras.Html exposing (block, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
+import Extras.Html exposing (block, ionicon, viewLabel, viewLinkWithDetails, viewOrdinalFreqText)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
 import Html exposing (Html, a, button, div, footer, h3, header, input, label, option, p, section, select, text, textarea)
@@ -241,7 +241,7 @@ renderModal model =
                             [ text "Do you really want to delete it?" ]
                         , footer [ class "modal-card-foot" ]
                             [ button [ type_ "button", class "button is-secondary is-active", onClick (OnDeleteModal False) ] [ text Translation.Main.cancelAction ]
-                            , button [ type_ "button", class "button is-danger", onClick OnDelete ] [ text "Delete" ]
+                            , button [ type_ "button", class "button is-danger", onClick OnDelete ] [ text Translation.Main.deleteAction ]
                             ]
                         ]
                     ]
@@ -257,7 +257,7 @@ viewEdit : ToDo -> Bool -> Int -> Html Msg
 viewEdit todo isNew windowWidth =
     div [ class "card" ]
         [ div [ class "card-header" ]
-            [ p [ class "card-header-title" ] [ text (addOrEditStr isNew) ] ]
+            [ p [ class "card-header-title" ] [ div [ class "mr-1" ] [ viewTitleIcon isNew ], text (addOrEditStr isNew) ] ]
         , div
             [ class "card-content" ]
             [ viewNameAndEnable todo
@@ -271,6 +271,15 @@ viewEdit todo isNew windowWidth =
             , viewButtons windowWidth
             ]
         ]
+
+
+viewTitleIcon : Bool -> Html msg
+viewTitleIcon isNew =
+    if isNew then
+        ionicon "star-outline"
+
+    else
+        ionicon "create-outline"
 
 
 viewAlert : String -> Html msg
@@ -306,7 +315,7 @@ viewNameAndEnable todo =
             , div [ class "control" ]
                 [ input [ type_ "text", class "input", HA.placeholder "Clean the washmaschine", onInput OnNameChange, value todo.name ] []
                 ]
-            , p [ class "help" ] [ text "Summary / Name of the calendar entry" ]
+            , p [ class "help" ] [ text Translation.helpTextName ]
             ]
         , div [ class "column" ]
             [ viewLabel [ text Translation.enableAction ]
