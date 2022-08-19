@@ -1,34 +1,34 @@
 module Translation.Alarm exposing (..)
 
-import Data.ToDo exposing (Frequency(..))
+import Data.Alarm exposing (Trigger(..))
 
 
-freq : Frequency -> String
-freq freqency =
-    case freqency of
+trigger : Trigger -> String
+trigger t =
+    case t of
         None ->
             "None"
 
-        Secondly ->
-            "Secondly"
+        Minutes0 ->
+            "At time of event"
 
-        Minutely ->
-            "Minutely"
+        Minutes15 ->
+            "15 minutes before"
 
-        Hourly ->
-            "Hourly"
+        Minutes30 ->
+            "30 minutes before"
 
-        Daily ->
-            "Daily"
+        Hours1 ->
+            "1 hour before"
 
-        Weekly ->
-            "Weekly"
+        Hours6 ->
+            "6 hours before"
 
-        Monthly ->
-            "Monthly"
+        Hours12 ->
+            "12 hours before"
 
-        Yearly ->
-            "Yearly"
+        Days1 ->
+            "1 day before"
 
         Unknown ->
-            "Unknown"
+            "unknown"

@@ -16,9 +16,10 @@ import Request
 import Request.Request exposing (deleteToDo, getNewToDo, getToDo, saveToDo)
 import Request.Util exposing (httpErrorToString)
 import Shared exposing (defaultBody)
-import Translation.Alarm as TAlarm
+import Translation.Alarm as AlarmTranslation
 import Translation.Edit as Translation
 import Translation.Main
+import Translation.ToDo as ToDoTranslation
 import View exposing (View)
 
 
@@ -349,14 +350,14 @@ viewRepetition todo =
     block
         [ viewLabel [ text Translation.repetition ]
         , div [ class "control" ]
-            [ viewFreqRadio "none" (TAlarm.freq Data.ToDo.None) (todo.frequency == Data.ToDo.None)
-            , viewFreqRadio "secondly" (TAlarm.freq Secondly) (todo.frequency == Data.ToDo.Secondly)
-            , viewFreqRadio "minutely" (TAlarm.freq Minutely) (todo.frequency == Data.ToDo.Minutely)
-            , viewFreqRadio "hourly" (TAlarm.freq Hourly) (todo.frequency == Data.ToDo.Hourly)
-            , viewFreqRadio "daily" (TAlarm.freq Daily) (todo.frequency == Data.ToDo.Daily)
-            , viewFreqRadio "weekly" (TAlarm.freq Weekly) (todo.frequency == Data.ToDo.Weekly)
-            , viewFreqRadio "monthly" (TAlarm.freq Monthly) (todo.frequency == Data.ToDo.Monthly)
-            , viewFreqRadio "yearly" (TAlarm.freq Yearly) (todo.frequency == Data.ToDo.Yearly)
+            [ viewFreqRadio "none" (ToDoTranslation.freq Data.ToDo.None) (todo.frequency == Data.ToDo.None)
+            , viewFreqRadio "secondly" (ToDoTranslation.freq Secondly) (todo.frequency == Data.ToDo.Secondly)
+            , viewFreqRadio "minutely" (ToDoTranslation.freq Minutely) (todo.frequency == Data.ToDo.Minutely)
+            , viewFreqRadio "hourly" (ToDoTranslation.freq Hourly) (todo.frequency == Data.ToDo.Hourly)
+            , viewFreqRadio "daily" (ToDoTranslation.freq Daily) (todo.frequency == Data.ToDo.Daily)
+            , viewFreqRadio "weekly" (ToDoTranslation.freq Weekly) (todo.frequency == Data.ToDo.Weekly)
+            , viewFreqRadio "monthly" (ToDoTranslation.freq Monthly) (todo.frequency == Data.ToDo.Monthly)
+            , viewFreqRadio "yearly" (ToDoTranslation.freq Yearly) (todo.frequency == Data.ToDo.Yearly)
             ]
         ]
 
@@ -419,7 +420,7 @@ viewAlarm todo =
 
 viewTriggerOption : Bool -> Trigger -> Html msg
 viewTriggerOption selected opt =
-    option [ value (opt |> triggerString), HA.selected selected ] [ text (opt |> triggerToUiString) ]
+    option [ value (opt |> triggerString), HA.selected selected ] [ text (opt |> AlarmTranslation.trigger) ]
 
 
 viewStartEnd : { a | startDT : String, endDT : String } -> Html Msg

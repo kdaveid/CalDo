@@ -6,6 +6,7 @@ import Gen.Route as Route exposing (Route)
 import Html exposing (Attribute, Html)
 import Html.Attributes as Attr exposing (class, href)
 import RemoteData exposing (RemoteData(..))
+import Translation.ToDo as Translation
 
 
 viewLabel : List (Html msg) -> Html msg
@@ -55,41 +56,41 @@ viewOrdinalFreqText repetitionUntil interval freq =
     let
         extra =
             if repetitionUntil == "" then
-                ", forever"
+                Translation.freqForever
 
             else
-                " until " ++ dateToString repetitionUntil
+                Translation.freqUntil ++ dateToString repetitionUntil
 
         --String.left 10 repetitionUntil
     in
     if interval <= 0 then
-        "Runs just once "
+        Translation.freqOnce
 
     else
         case freq of
             None ->
-                "Runs just once"
+                Translation.freqOnce
 
             Secondly ->
-                getFreqText interval "second" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Minutely ->
-                getFreqText interval "minute" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Hourly ->
-                getFreqText interval "hour" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Daily ->
-                getFreqText interval "day" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Weekly ->
-                getFreqText interval "week" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Monthly ->
-                getFreqText interval "month" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Yearly ->
-                getFreqText interval "year" extra
+                getFreqText interval (Translation.freqEveryLong freq) extra
 
             Unknown ->
                 "Unknown - an error!"
@@ -98,10 +99,10 @@ viewOrdinalFreqText repetitionUntil interval freq =
 getFreqText : Int -> String -> String -> String
 getFreqText int freq extra =
     if int == 1 then
-        "Runs every " ++ freq ++ extra
+        Translation.freqEvery ++ freq ++ extra
 
     else
-        "Runs every " ++ String.fromInt int ++ " " ++ freq ++ "s" ++ extra
+        Translation.freqEvery ++ String.fromInt int ++ " " ++ freq ++ "s" ++ extra
 
 
 ionicon : String -> Html msg
