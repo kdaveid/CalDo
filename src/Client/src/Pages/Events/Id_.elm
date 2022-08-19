@@ -193,16 +193,26 @@ view model =
     { title = "Homepage"
     , body =
         [ defaultBody (Just MTranslation.events)
-            [ viewEventsOrError model
-            , viewCreateEventForm model
+            [ viewCreateEventForm model
+            , viewPastEvents model.events
             ]
         ]
     }
 
 
-viewEventsOrError : Model -> Html Msg
-viewEventsOrError model =
-    case model.events of
+viewPastEvents : WebData (List ToDoEvent) -> Html Msg
+viewPastEvents wdEvents =
+    div [ class "card" ]
+        [ div [ class "card-header" ] [ div [ class "card-header-title" ] [ text Translation.pastEvents ] ]
+        , div [ class "card-content" ]
+            [ viewEventsOrError wdEvents
+            ]
+        ]
+
+
+viewEventsOrError : WebData (List ToDoEvent) -> Html Msg
+viewEventsOrError wdEvents =
+    case wdEvents of
         RemoteData.NotAsked ->
             text "Not asked"
 
@@ -226,13 +236,14 @@ viewEventsOrError model =
 
 viewEvent : ToDoEvent -> Html Msg
 viewEvent evt =
-    Html.article [ class "message is-info" ]
-        [ div [ class "message-header" ]
+    div [ class "notification is-info mb-5" ]
+        [ p []
             [ viewAdjustmentIcon evt
             , text (dateToString evt.date)
-            , button [ class "delete", onClick (OnDeleteEvent evt.eventId) ] []
+            , text " - "
+            , viewRemarks evt.remarks
             ]
-        , div [ class "message-body" ] [ viewRemarks evt.remarks ]
+        , button [ class "delete", onClick (OnDeleteEvent evt.eventId) ] []
         ]
 
 
@@ -246,7 +257,7 @@ viewRemarks remarks =
             else
                 "none"
     in
-    p [] [ text ("Remarks: " ++ remText) ]
+    text ("Remarks: " ++ remText)
 
 
 viewAdjustmentIcon : ToDoEvent -> Html msg
@@ -264,13 +275,9 @@ viewAdjustmentIcon evt =
 
 viewError : String -> Html Msg
 viewError errorMessage =
-    let
-        errorHeading =
-            "Couldn't fetch data at this time."
-    in
-    div []
-        [ h3 [] [ text errorHeading ]
-        , text ("Error: " ++ errorMessage)
+    div [ class "box" ]
+        [ h3 [] [ text MTranslation.error ]
+        , text (MTranslation.error ++ ": " ++ errorMessage)
         ]
 
 
@@ -289,7 +296,7 @@ viewCreateEventForm model =
         RemoteData.Success evt ->
             div [ class "box" ]
                 [ p [] [ text Translation.toDoAsDone ]
-                , Html.h4 [ class "title is-5" ] [ text ("ToDo: " ++ todoName) ]
+                , Html.h4 [ class "title is-5" ] [ text todoName ]
                 , div [ class "field" ]
                     [ label [ class "label" ]
                         [ text Translation.doneAt ]
@@ -321,10 +328,6 @@ viewCreateEventForm model =
                     [ div [ class "control" ]
                         [ button [ class "button is-link", onClick OnSaveNewEvent ]
                             [ text Translation.addEventAction ]
-                        ]
-                    , div [ class "control" ]
-                        [ button [ class "button is-link is-light" ]
-                            [ text MTranslation.cancelAction ]
                         ]
                     ]
                 ]

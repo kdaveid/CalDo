@@ -89,4 +89,4 @@ deleteAction =
 
 error : String
 error = 
-    "Fehler."
+    "Fehler"

@@ -1,5 +1,8 @@
 module Translation.Events exposing (..)
 
+pastEvents : String
+pastEvents = "Past events"
+
 adjustCalendarEnabled : String 
 adjustCalendarEnabled = "Adjust calendar"
 

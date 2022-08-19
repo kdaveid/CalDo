@@ -36,7 +36,7 @@ public class EventController : ControllerBase
             Date = DateTime.Today,
             EventId = nextId,
             Remarks = "",
-            AdjustCalendar = false,
+            AdjustCalendar = true,
         };
     }
 

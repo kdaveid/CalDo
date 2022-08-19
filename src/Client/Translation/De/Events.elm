@@ -1,16 +1,19 @@
 module Translation.Events exposing (..)
 
+pastEvents : String
+pastEvents = "Frühere Ereignisse"
+
 doneAt : String
 doneAt = "Erledigt am"
 
 adjustCalendarEnabled : String 
-adjustCalendarEnabled = "Kalender anpassen"
+adjustCalendarEnabled = "Passe Kalender an"
 
 addEventAction : String
 addEventAction = "Hinzufügen"
 
 noEvents : String
-noEvents = "Noch kein einziges ToDo erfüllt - füg eins hinzu!"
+noEvents = "Noch kein einziges ToDo erfüllt - füg ein Ereignis hinzu!"
 
 
 toDoAsDone : String
