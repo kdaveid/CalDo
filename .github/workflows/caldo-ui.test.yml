@@ -41,5 +41,7 @@ jobs:
           context: ./src/Client
           file: ./src/Client/Dockerfile
           push: true
+          build-args: |
+            ui_mode:develop
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

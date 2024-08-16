@@ -3,11 +3,11 @@ module Pages.Events.Id_ exposing (Model, Msg, page)
 import Browser.Navigation exposing (Key)
 import Data.ToDo exposing (Frequency(..), ToDo)
 import Data.ToDoEvent exposing (ToDoEvent)
-import Extras.Html exposing (dateToString, ionicon, viewLinkWithDetails)
+import Extras.Html exposing (dateToString, ionicon)
 import Gen.Params.Edit.Id_ exposing (Params)
 import Gen.Route exposing (Route(..))
-import Html exposing (Html, a, button, div, h3, input, label, li, nav, p, text, textarea, ul)
-import Html.Attributes as HA exposing (attribute, class, href, id, name, placeholder, type_, value)
+import Html exposing (Html, button, div, h3, input, label, p, text, textarea)
+import Html.Attributes as HA exposing (attribute, class, id, name, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Infra exposing (Session)
@@ -16,7 +16,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Request
 import Request.Request exposing (deleteEvent, getEventList, getNewEvent, getToDo, saveEvent)
 import Request.Util exposing (httpErrorToString)
-import Shared
+import Shared exposing (defaultBody)
 import View exposing (View)
 
 
@@ -190,13 +190,9 @@ view : Model -> View Msg
 view model =
     { title = "Homepage"
     , body =
-        [ div [ class "section" ]
-            [ div [ class "container" ]
-                [ Html.h2 [ class "title" ] [ text "Events" ]
-                , viewBreadCrumbs model
-                , viewEventsOrError model
-                , viewCreateEventForm model
-                ]
+        [ defaultBody (Just "Events")
+            [ viewEventsOrError model
+            , viewCreateEventForm model
             ]
         ]
     }
@@ -280,74 +276,46 @@ viewCreateEventForm : Model -> Html Msg
 viewCreateEventForm model =
     case model.newEvent of
         RemoteData.Success evt ->
-            div [ class "section" ]
-                [ div [ class "box" ]
-                    [ Html.h4 [ class "title is-4" ] [ text "Marking a ToDo as done" ]
-                    , div [ class "field" ]
-                        [ label [ class "label" ]
-                            [ text "Date" ]
-                        , div [ class "control" ]
-                            [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
-                                []
-                            ]
-                        ]
-                    , div [ class "field" ]
-                        [ label [ class "label" ]
-                            [ text "Remarks" ]
-                        , div [ class "control" ]
-                            [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
-                                []
-                            ]
-                        ]
-                    , div [ class "field" ]
-                        [ input
-                            [ class "is-checkradio"
-                            , id "adjustCalendar"
-                            , type_ "checkbox"
-                            , name "adjustCalendar"
-                            , HA.checked evt.adjustCalendar
-                            ]
+            div [ class "box" ]
+                [ Html.h4 [ class "title is-4" ] [ text "Marking a ToDo as done" ]
+                , div [ class "field" ]
+                    [ label [ class "label" ]
+                        [ text "Date" ]
+                    , div [ class "control" ]
+                        [ input [ class "input", type_ "date", value (String.left 10 evt.date), onInput OnNewEventDateChanged ]
                             []
-                        , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text "Adjust calendar" ]
                         ]
-                    , div [ class "field is-grouped" ]
-                        [ div [ class "control" ]
-                            [ button [ class "button is-link", onClick OnSaveNewEvent ]
-                                [ text "Add event" ]
-                            ]
-                        , div [ class "control" ]
-                            [ button [ class "button is-link is-light" ]
-                                [ text "Cancel" ]
-                            ]
+                    ]
+                , div [ class "field" ]
+                    [ label [ class "label" ]
+                        [ text "Remarks" ]
+                    , div [ class "control" ]
+                        [ textarea [ class "textarea", placeholder "Specialties", value evt.remarks, onInput OnNewEventRemarksChanged ]
+                            []
+                        ]
+                    ]
+                , div [ class "field" ]
+                    [ input
+                        [ class "is-checkradio"
+                        , id "adjustCalendar"
+                        , type_ "checkbox"
+                        , name "adjustCalendar"
+                        , HA.checked evt.adjustCalendar
+                        ]
+                        []
+                    , label [ attribute "for" "adjustCalendar", onClick (OnNewEventAdjustCalendarChanged (not evt.adjustCalendar)) ] [ text "Adjust calendar" ]
+                    ]
+                , div [ class "field is-grouped" ]
+                    [ div [ class "control" ]
+                        [ button [ class "button is-link", onClick OnSaveNewEvent ]
+                            [ text "Add event" ]
+                        ]
+                    , div [ class "control" ]
+                        [ button [ class "button is-link is-light" ]
+                            [ text "Cancel" ]
                         ]
                     ]
                 ]
 
         _ ->
             div [] []
-
-
-viewBreadCrumbs : Model -> Html Msg
-viewBreadCrumbs model =
-    case model.todo of
-        RemoteData.NotAsked ->
-            text "Not asked"
-
-        RemoteData.Success todo ->
-            nav [ class "breadcrumb", attribute "aria-label" "breadcrumbs" ]
-                [ ul []
-                    [ li []
-                        [ viewLinkWithDetails [] [ text "Home" ] Gen.Route.Home_
-                        ]
-                    , li [ class "is-active" ]
-                        [ a [ href "#", attribute "aria-current" "page" ]
-                            [ text todo.name ]
-                        ]
-                    ]
-                ]
-
-        RemoteData.Loading ->
-            p [ class "subtitle" ] [ text "Loading..." ]
-
-        RemoteData.Failure httpError ->
-            viewError (httpErrorToString httpError)

@@ -1,18 +1,15 @@
 module Pages.Calendar exposing (Model, Msg, page)
 
-import Element exposing (html)
-import Extras.Html exposing (viewLinkWithDetails)
 import Gen.Params.Calendar exposing (Params)
-import Gen.Route
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class, type_)
+import Html.Attributes exposing (class)
 import Http
 import Infra exposing (Session)
 import Page
 import Request
 import Request.Request exposing (getPlainTextCal, getPlainTextCalUrl)
 import Request.Util exposing (httpErrorToString)
-import Shared
+import Shared exposing (defaultBody)
 import View exposing (View)
 
 
@@ -99,8 +96,10 @@ view : Model -> View Msg
 view model =
     { title = "CalDo Calendar"
     , body =
-        [ div [ class "section " ]
-            [ viewCalendar model ]
+        [ defaultBody (Just "Calendar")
+            [ viewCalendarUrl model
+            , viewCalendar model
+            ]
         ]
     }
 
@@ -109,28 +108,38 @@ viewCalendar : Model -> Html msg
 viewCalendar model =
     Html.article [ class "message" ]
         [ div [ class "message-header" ]
-            [ Html.p [] [ text "Calendar" ]
-            , viewLinkWithDetails [ type_ "button", class "button is-light" ]
-                [ Html.span [] [ text "Home" ] ]
-                Gen.Route.Home_
-            ]
+            [ Html.p [] [ text "Calendar" ] ]
         , div [ class "message-body" ]
-            [ case model.calUrl of
-                Just url ->
-                    div []
-                        [ Html.h3 [] [ text "Calendar-Url" ]
-                        , div [ class "content" ] [ text "You can subscribe to the calendar with this url: " ]
-                        , Html.pre [] [ text url ]
-                        ]
-
-                Nothing ->
-                    div [] []
-            , Html.h3 [] [ text "Calendar" ]
-            , case model.cal of
+            [ case model.cal of
                 Just calStr ->
                     Html.pre [] [ text calStr ]
 
                 Nothing ->
                     div [] []
+            ]
+        ]
+
+
+viewCalendarUrl : Model -> Html msg
+viewCalendarUrl model =
+    Html.article [ class "message" ]
+        [ div [ class "message-header" ]
+            [ Html.p []
+                [ text "Calendar Url" ]
+            ]
+        , div [ class "message-body" ]
+            [ let
+                urlText =
+                    case model.calUrl of
+                        Just url ->
+                            url
+
+                        Nothing ->
+                            "unfortunately no url information available"
+              in
+              div []
+                [ div [ class "content" ] [ text "You can subscribe to the calendar with this url: " ]
+                , Html.pre [] [ text urlText ]
+                ]
             ]
         ]
